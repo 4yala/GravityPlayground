@@ -16,6 +16,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Animator playerAni;
     [SerializeField] GameObject pauseCanvas;
     [SerializeField] ConstantForce myGravity;
+    [SerializeField] Camera myCam;
 
     [Header("Player states")]
     public bool zerograv;
@@ -43,6 +44,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
+            /*
             if(loggedDirection == 0)
             {
                 myGravity.force = new Vector3(0f, 9.81f, 0f);
@@ -53,6 +55,10 @@ public class PlayerController : MonoBehaviour
                 myGravity.force = new Vector3(0f, -9.81f, 0f);
                 loggedDirection = 0;
             }
+            */
+            Vector3 cameraDirection = myCam.transform.forward;
+            Vector3 newGravity = cameraDirection.normalized * 9.81f;
+            myGravity.force = newGravity;
             zerograv = false;
             speed = 4f;
         }
@@ -172,7 +178,8 @@ public class PlayerController : MonoBehaviour
         velocityChange = new Vector3(velocityChange.x, 0, velocityChange.z);
 
         Vector3.ClampMagnitude(velocityChange, maxForce);
-        rb.AddForce(velocityChange, ForceMode.VelocityChange);
+        Debug.Log(velocityChange);
+        //rb.AddForce(velocityChange, ForceMode.VelocityChange);
     }
     // Update is called once per frame
     void Update()
