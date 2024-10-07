@@ -179,7 +179,7 @@ public class PlayerController : MonoBehaviour
 
         Vector3.ClampMagnitude(velocityChange, maxForce);
         Debug.Log(velocityChange);
-        //rb.AddForce(velocityChange, ForceMode.VelocityChange);
+        rb.AddForce(velocityChange, ForceMode.VelocityChange);
     }
     // Update is called once per frame
     void Update()

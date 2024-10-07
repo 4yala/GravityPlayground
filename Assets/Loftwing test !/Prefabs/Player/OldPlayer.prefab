@@ -180,13 +180,14 @@ GameObject:
   - component: {fileID: 4218338891613986246}
   - component: {fileID: 3987334244466941723}
   - component: {fileID: 8369857860770329615}
+  - component: {fileID: 1091583291188117480}
   m_Layer: 8
-  m_Name: Player Platform
+  m_Name: OldPlayer
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6910870232448231955
 Transform:
   m_ObjectHideFlags: 0
@@ -225,7 +226,7 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 112
@@ -276,6 +277,10 @@ MonoBehaviour:
   myCamera: {fileID: 0}
   playerAni: {fileID: 8369857860770329615}
   pauseCanvas: {fileID: 0}
+  myGravity: {fileID: 1091583291188117480}
+  myCam: {fileID: 0}
+  zerograv: 0
+  loggedDirection: 0
   grounded: 1
   diving: 0
   paused: 0
@@ -412,6 +417,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 3c6b7ce0-4e0c-45b1-874d-6d94b981e05c
     m_ActionName: Player/Pause[/Keyboard/tab]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 4218338891613986246}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: OnZeroGrav
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 6b9415a4-a638-44cf-89e9-4c385c369db8
+    m_ActionName: Player/Switch[/Keyboard/f]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -438,6 +459,18 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!75 &1091583291188117480
+ConstantForce:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1482176226722254779}
+  m_Enabled: 1
+  m_Force: {x: 0, y: -9.81, z: 0}
+  m_RelativeForce: {x: 0, y: 0, z: 0}
+  m_Torque: {x: 0, y: 0, z: 0}
+  m_RelativeTorque: {x: 0, y: 0, z: 0}
 --- !u!1 &1841682015060160261
 GameObject:
   m_ObjectHideFlags: 0
