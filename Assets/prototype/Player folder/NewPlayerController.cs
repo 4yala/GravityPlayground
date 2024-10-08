@@ -13,6 +13,7 @@ public class NewPlayerController : MonoBehaviour
 
     [Header("Movement Variables")]
     [SerializeField] ConstantForce myGravity;
+    [Tooltip("The total gravitational pull that the player will have in any direction")]
     [SerializeField] float gravityForce;
     [SerializeField] float moveSpeed;
     [SerializeField] float maxSpeedWalk;
@@ -24,6 +25,7 @@ public class NewPlayerController : MonoBehaviour
     
     [Header("Debug elements to inspect")]
     [SerializeField] Vector2 moveInput;
+    [SerializeField] Vector3 gravitationalRotation;
 
     [Header("Assets required")]
     [SerializeField] Camera myCamera;
