@@ -96,9 +96,11 @@ public class NewPlayerController : MonoBehaviour
             {
                 //flatten y as we are not using that axis.
                 Vector3 cameraForward = (myCamera.transform.forward);
+                //Vector3 cameraForward = (myCamera.transform.parent.TransformDirection(Vector3.forward));
                 cameraForward.y = 0f;
                 cameraForward.Normalize();
-                Vector3 cameraRight = (myCamera.transform.right);
+                //Vector3 cameraRight = (myCamera.transform.right);
+                Vector3 cameraRight = (myCamera.transform.parent.TransformDirection(Vector3.right));
                 cameraRight.y = 0f;
                 cameraRight.Normalize();
 
