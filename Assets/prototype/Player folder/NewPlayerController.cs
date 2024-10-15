@@ -32,6 +32,7 @@ public class NewPlayerController : MonoBehaviour
     [SerializeField] Vector3 gravitationalRotation;
     [SerializeField] Vector3 downDirection;
     [SerializeField] int presslogged;
+    [SerializeField] Vector3 loggedGravitationalDirection;
      
     
 
@@ -137,20 +138,15 @@ public class NewPlayerController : MonoBehaviour
     {
         Debug.Log("Updating");
         Quaternion targetRotation = Quaternion.FromToRotation(transform.up, -gravityDirection) * transform.rotation;
-
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-        /*
-        targetRotation = Quaternion.FromToRotation(myCameraOrientation.transform.up, transform.up) * myCameraOrientation.transform.rotation;
-        myCameraOrientation.transform.rotation = Quaternion.Slerp(myCameraOrientation.transform.rotation,targetRotation, cameraRotationSpeed * Time.deltaTime);
-        */
 
     }
     void SmoothLanding()
     {
         RaycastHit hit;
         float rayLength = 1.1f;
-        Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.down) * rayLength, Color.green);
-        if (Physics.Raycast(transform.position, -transform.up, out hit, rayLength))
+        Debug.DrawRay(transform.position, /*transform.TransformDirection(Vector3.down)*/gravitationalRotation * rayLength, Color.green);
+        if (Physics.Raycast(transform.position,/*-transform.up */gravitationalRotation, out hit, rayLength))
         {
             //character snapping to surface
             Quaternion targetRotation = Quaternion.FromToRotation(transform.up, hit.normal) * transform.rotation;
@@ -244,7 +240,8 @@ public class NewPlayerController : MonoBehaviour
             else
             {
                 Vector3 cameraDirection = myCamera.transform.forward;
-                OrientatePlayer(cameraDirection);
+                //OrientatePlayer(cameraDirection);
+                gravitationalRotation = myCamera.transform.forward;
                 Vector3 newGravity = cameraDirection.normalized * gravityForce;
                 myGravity.force = newGravity;
                 zerograv = false;
