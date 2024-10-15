@@ -32,6 +32,7 @@ public class NewPlayerController : MonoBehaviour
     [SerializeField] Vector3 gravitationalRotation;
     [SerializeField] Vector3 downDirection;
     [SerializeField] int presslogged;
+     
     
 
     //[Header("Assets required")]
@@ -81,6 +82,8 @@ public class NewPlayerController : MonoBehaviour
         {
             myCameraCM.m_YAxisRecentering.m_enabled = false;
         }
+        Debug.DrawRay(myCameraOrientation.transform.position, myCameraOrientation.transform.up * 5f, Color.green);
+
     }
 
     // FixedUpdate for non frame dependent functions, I.e. physics
@@ -94,21 +97,17 @@ public class NewPlayerController : MonoBehaviour
             //only if there's an input.
             if(inputDirection.magnitude > 0.1f)
             {
-                //flatten y as we are not using that axis.
-                Vector3 cameraForward = (myCamera.transform.forward);
-                //Vector3 cameraForward = (myCamera.transform.parent.TransformDirection(Vector3.forward));
-                cameraForward.y = 0f;
-                cameraForward.Normalize();
-                //Vector3 cameraRight = (myCamera.transform.right);
-                Vector3 cameraRight = (myCamera.transform.parent.TransformDirection(Vector3.right));
-                cameraRight.y = 0f;
-                cameraRight.Normalize();
+                //Calculate a new vector reflective of where the character's upwards direction MUST face
+                Vector3 cameraForward = Vector3.ProjectOnPlane(myCamera.transform.forward, myCameraOrientation.transform.up);
+                Vector3 cameraRight = Vector3.ProjectOnPlane(myCamera.transform.right, myCameraOrientation.transform.up);
 
+                //translate it with inputs
                 Vector3 targetDirection = (cameraForward * moveInput.y + cameraRight * moveInput.x).normalized;
 
                 if (targetDirection.magnitude > 0.1f)
                 {
-                    Quaternion targetRotation = Quaternion.LookRotation(targetDirection);
+                    //as the targetDirection has a declared up direction, it cannot travel in that direction as only forward and right is used.
+                    Quaternion targetRotation = Quaternion.LookRotation(targetDirection,myCameraOrientation.transform.up);
                     transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime);
                 }
                 //more to consider in the future! such as damping the Y value on speed. for now This is just a base.
@@ -216,7 +215,7 @@ public class NewPlayerController : MonoBehaviour
         {
             diving = true;
             Debug.Log("Flying");
-            playerAni.SetTrigger("Diving");
+            //playerAni.SetTrigger("Diving");
             rb.drag = 0f;
         }
         else
@@ -278,7 +277,7 @@ public class NewPlayerController : MonoBehaviour
     {
         if (grounded)
         {
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
         }
     }
     #endregion
