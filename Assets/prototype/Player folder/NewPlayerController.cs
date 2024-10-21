@@ -62,6 +62,14 @@ public class NewPlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(moveInput.magnitude >0 && rb.velocity.magnitude > 0 && grounded)
+        {
+            playerAni.SetBool("Movement", true);
+        }
+        else
+        {
+            playerAni.SetBool("Movement", false);
+        }
         if (!zerograv)
         {
             if (shiftDiving)
@@ -236,6 +244,7 @@ public class NewPlayerController : MonoBehaviour
                 grounded = false;
                 rb.freezeRotation = false;
                 rb.drag = zeroGravDrag;
+                playerAni.SetBool("Zero Grav", true);
             }
             else
             {
@@ -249,6 +258,7 @@ public class NewPlayerController : MonoBehaviour
                 shiftDiving = true;
                 rb.freezeRotation = true;
                 rb.drag = 0f;
+                playerAni.SetBool("Zero Grav", false);
             }
         }
 
@@ -264,6 +274,7 @@ public class NewPlayerController : MonoBehaviour
             gameObject.transform.rotation = Quaternion.Euler(0,gameObject.transform.rotation.y,0);
             shifted = false;
             myCameraOrientation.transform.rotation = Quaternion.Euler(0, 0, 0);
+            playerAni.SetBool("Zero Grav", false);
         }
     }
     public void OnMove(InputAction.CallbackContext context)
