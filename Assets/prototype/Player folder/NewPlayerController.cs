@@ -128,13 +128,11 @@ public class NewPlayerController : MonoBehaviour
                 {
                     rb.velocity = rb.velocity.normalized * maxSpeedWalk;
                 }
-                playerAni.SetBool("Moving", true);
             }
             else
             {
-                playerAni.SetBool("Moving", false);
 
-                //break the player when movement stops, only if its touching the floor
+                //break the player when movement stops, only if it's touching the floor
                 if(grounded)
                 {
                     rb.AddForce(rb.velocity * -deceleration, ForceMode.Force);
@@ -179,33 +177,111 @@ public class NewPlayerController : MonoBehaviour
         Debug.DrawRay(transform.position, /*transform.TransformDirection(Vector3.down)*/gravitationalDirection * rayLength, Color.blue);
         if (Physics.Raycast(transform.position,/*-transform.up */gravitationalDirection, out hit, rayLength))
         {
-            //character snapping to surface
-            Quaternion targetRotation = Quaternion.FromToRotation(transform.up, hit.normal) * transform.rotation;
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-
-            //gravity adjusting to surface
-            Vector3 newGravity = -transform.up.normalized * gravityForce;
-            myGravity.force = newGravity;
-
-            //FIX LATER VV
-            gravitationalDirection = -transform.up;
-            //FIX LATER ^^
-
-            //camera orientation
-            SmoothCamera();
-            grounded = true;
             shiftDiving = false;
-            Debug.Log("fixed orientation");
+            StartCoroutine(Landing(hit, .5f, true));
+            // //character snapping to surface
+            // Quaternion targetRotation = Quaternion.FromToRotation(transform.up, hit.normal) * transform.rotation;
+            // transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+            //
+            // //gravity adjusting to surface
+            // Vector3 newGravity = -transform.up.normalized * gravityForce;
+            // myGravity.force = newGravity;
+            //
+            // //FIX LATER VV
+            // gravitationalDirection = -transform.up;
+            // //FIX LATER ^^
+            //
+            // //camera orientation
+            // SmoothCamera();
+            // grounded = true;
+            // shiftDiving = false;
+            // Debug.Log("fixed orientation");
         }
     }
+
+    IEnumerator Landing(RaycastHit hit, float duration,bool landCamera)
+    {
+        float elapsedTime = 0f;
+        Quaternion targetRotation = Quaternion.FromToRotation(transform.up, hit.normal) * transform.rotation;
+        Quaternion startRotation = transform.rotation;
+        
+
+        while (elapsedTime < duration)
+        {
+            float t = Mathf.Clamp01(elapsedTime / duration);
+            
+            transform.rotation = Quaternion.Slerp(startRotation, targetRotation, t);
+            Debug.Log($"Transform Rotation: {transform.rotation}");
+
+            elapsedTime += Time.deltaTime;
+            
+            yield return null;
+
+        }
+        transform.rotation = targetRotation;
+        grounded = true;
+        if (landCamera)
+        {
+            Vector3 newGravity = -transform.up.normalized * gravityForce;
+            myGravity.force = newGravity;
+            Debug.Log("starting cameralerp");
+            StartCoroutine((CameraLerp(0.5f)));
+        }
+        //gravity adjusting to surface
+
+        //
+        // //FIX LATER VV
+        // gravitationalDirection = -transform.up;
+        // //FIX LATER ^^
+        //
+        //camera orientation
+        //SmoothCamera();
+
+
+        yield return null;
+    }
+    
+    IEnumerator CameraLerp(float duration)
+    {
+        
+        Debug.Log("camera lerp started");
+        float elapsedTime = 0f;
+        Quaternion startRotation = myCameraOrientation.transform.rotation;
+        Quaternion targetCameraRotation =
+            Quaternion.FromToRotation(myCameraOrientation.transform.up, transform.up) *
+            myCameraOrientation.transform.rotation;
+
+
+        while (elapsedTime < duration)
+        {
+            float t = Mathf.Clamp01(elapsedTime / duration);
+
+            myCameraOrientation.transform.rotation =
+                Quaternion.Slerp(startRotation, targetCameraRotation, elapsedTime / duration);
+            Debug.Log($"Camera rotation: {myCameraOrientation.transform.localRotation}");
+
+            elapsedTime += Time.deltaTime;
+            Debug.Log(elapsedTime);
+            yield return null;
+
+        }
+        
+        Debug.Log(("ending camera lerp"));
+
+        myCameraOrientation.transform.rotation = targetCameraRotation;
+        myCameraCM.m_YAxisRecentering.m_enabled = true;
+        myCameraCM.m_YAxisRecentering.RecenterNow();
+
+        yield return null;
+    }
+    
     void SmoothCamera()
     {
         //camera orientation
         Quaternion targetRotation = Quaternion.FromToRotation(myCameraOrientation.transform.up, transform.up) * myCameraOrientation.transform.rotation;
-        Debug.Log(targetRotation);
         myCameraOrientation.transform.rotation = Quaternion.Slerp(myCameraOrientation.transform.rotation, targetRotation, cameraRotationSpeed * Time.deltaTime);
-        myCameraCM.m_YAxisRecentering.m_enabled = true;
-        myCameraCM.m_YAxisRecentering.RecenterNow();
+        // myCameraCM.m_YAxisRecentering.m_enabled = true;
+        // myCameraCM.m_YAxisRecentering.RecenterNow();
     }
     #endregion
     //Here goes recurring events that go in update
@@ -222,6 +298,7 @@ public class NewPlayerController : MonoBehaviour
                 Debug.Log("Landed");
                 diving = false;
                 SetSingleAnimation("Grounded");
+                StartCoroutine(Landing(hit, .5f, false));
             }
             rb.drag = groundedDrag;
             grounded = true;
