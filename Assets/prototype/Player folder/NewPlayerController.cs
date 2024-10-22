@@ -20,6 +20,10 @@ public class NewPlayerController : MonoBehaviour
     [SerializeField] float gravityForce;
     [SerializeField] float moveSpeed;
     [SerializeField] float maxSpeedWalk;
+    [SerializeField] float jumpForwardSpeed;
+    [SerializeField] float airDiveSpeed;
+    [SerializeField] float maxDiveSpeed;
+    [SerializeField] float diveAcceleration;
     [SerializeField] float deceleration;
     [SerializeField] float rotationSpeed;
     [SerializeField] float cameraRotationSpeed;
@@ -29,9 +33,7 @@ public class NewPlayerController : MonoBehaviour
     
     [Header("Debug elements to inspect")]
     [SerializeField] Vector2 moveInput;
-    [SerializeField] Vector3 gravitationalRotation;
-    [SerializeField] Vector3 downDirection;
-    [SerializeField] int presslogged;
+    [SerializeField] Vector3 gravitationalDirection;
     [SerializeField] Vector3 loggedGravitationalDirection;
      
     
@@ -46,6 +48,7 @@ public class NewPlayerController : MonoBehaviour
     [SerializeField] bool grounded;
     [SerializeField] bool diving;
     [SerializeField] bool shiftDiving; //to be used only when toggling out from zero gravity, in order to smooth landing.
+    [SerializeField] List<string> AnimationBools;
     
 
     #endregion
@@ -56,33 +59,24 @@ public class NewPlayerController : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         myCamera = FindFirstObjectByType<Camera>();
-        downDirection = transform.TransformDirection(Vector3.down);
+        
+        gravitationalDirection = -transform.up;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(moveInput.magnitude >0 && rb.velocity.magnitude > 0 && grounded)
-        {
-            playerAni.SetBool("Movement", true);
-        }
-        else
-        {
-            playerAni.SetBool("Movement", false);
-        }
+        AnimationStates();
         if (!zerograv)
         {
             if (shiftDiving)
             {
                 SmoothLanding();
             }
-            else
+            IsGrounded();
+            if (!grounded && !diving)
             {
-                IsGrounded();
-                if (!grounded && !diving)
-                {
-                    HighGround();
-                }
+                HighGround();
             }
 
         }
@@ -98,7 +92,7 @@ public class NewPlayerController : MonoBehaviour
     // FixedUpdate for non frame dependent functions, I.e. physics
     void FixedUpdate()
     {
-        if(!immobile)
+        if(!immobile && !diving)
         {
             //gather the input information.
             Vector3 inputDirection = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
@@ -120,12 +114,20 @@ public class NewPlayerController : MonoBehaviour
                     transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime);
                 }
                 //more to consider in the future! such as damping the Y value on speed. for now This is just a base.
+
+                //end with moving forward from character perspective
+                if (grounded)
+                {
+                    rb.AddForce(transform.forward * moveSpeed, ForceMode.Acceleration);
+                }
+                else
+                {
+                    rb.AddForce(transform.forward * jumpForwardSpeed, ForceMode.Acceleration);
+                }
                 if (rb.velocity.magnitude > maxSpeedWalk)
                 {
                     rb.velocity = rb.velocity.normalized * maxSpeedWalk;
                 }
-                //end with moving forward from character perspective
-                rb.AddForce(transform.forward * moveSpeed, ForceMode.Acceleration);
                 playerAni.SetBool("Moving", true);
             }
             else
@@ -138,6 +140,27 @@ public class NewPlayerController : MonoBehaviour
                     rb.AddForce(rb.velocity * -deceleration, ForceMode.Force);
                 }
             }
+        }
+        else if (!immobile && diving)
+        {
+            if(rb.velocity.magnitude < maxDiveSpeed)
+            {
+                //rb.AddForce(gravitationalDirection * diveAcceleration, ForceMode.Acceleration);
+                Debug.Log("Max Speed reached");
+            }
+            Vector3 gravNormalized = gravitationalDirection.normalized;
+            Quaternion targetRotation = Quaternion.FromToRotation(transform.up, gravNormalized) * transform.rotation;
+            transform.rotation = Quaternion.RotateTowards(transform.rotation,targetRotation,  50f* Time.fixedDeltaTime);
+            
+            //movement
+            Vector3 targetMovement = -transform.forward * moveInput.y + transform.right * moveInput.x;
+
+            if(targetMovement.magnitude > 0.1f)
+            {
+                rb.AddForce(targetMovement *airDiveSpeed, ForceMode.Acceleration);
+            }
+            
+
         }
     }
     //Here go unique events that are triggered sometimes
@@ -153,8 +176,8 @@ public class NewPlayerController : MonoBehaviour
     {
         RaycastHit hit;
         float rayLength = 1.1f;
-        Debug.DrawRay(transform.position, /*transform.TransformDirection(Vector3.down)*/gravitationalRotation * rayLength, Color.green);
-        if (Physics.Raycast(transform.position,/*-transform.up */gravitationalRotation, out hit, rayLength))
+        Debug.DrawRay(transform.position, /*transform.TransformDirection(Vector3.down)*/gravitationalDirection * rayLength, Color.blue);
+        if (Physics.Raycast(transform.position,/*-transform.up */gravitationalDirection, out hit, rayLength))
         {
             //character snapping to surface
             Quaternion targetRotation = Quaternion.FromToRotation(transform.up, hit.normal) * transform.rotation;
@@ -163,6 +186,10 @@ public class NewPlayerController : MonoBehaviour
             //gravity adjusting to surface
             Vector3 newGravity = -transform.up.normalized * gravityForce;
             myGravity.force = newGravity;
+
+            //FIX LATER VV
+            gravitationalDirection = -transform.up;
+            //FIX LATER ^^
 
             //camera orientation
             SmoothCamera();
@@ -188,13 +215,13 @@ public class NewPlayerController : MonoBehaviour
         RaycastHit hit;
         float rayLength = 1.1f; // Adjust based on your character's size
         Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.down) * rayLength, Color.green);
-        if (Physics.Raycast(transform.position, /*downDirection,*/ -transform.up, out hit, rayLength))
+        if (Physics.Raycast(transform.position, gravitationalDirection,/* -transform.up,*/ out hit, rayLength))
         {
             if (diving)
             {
                 Debug.Log("Landed");
                 diving = false;
-                playerAni.SetTrigger("Resume");
+                SetSingleAnimation("Grounded");
             }
             rb.drag = groundedDrag;
             grounded = true;
@@ -205,7 +232,7 @@ public class NewPlayerController : MonoBehaviour
             grounded = false;
             if (!diving)
             {
-                rb.drag = 1f;
+                rb.drag = 0f;
             }
         }
         
@@ -214,18 +241,40 @@ public class NewPlayerController : MonoBehaviour
     {
         RaycastHit hit;
         float rayLength = 15f; // Adjust based on your character's size
-        //Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.down) * rayLength, Color.red);
-        if (!Physics.Raycast(transform.position, /*downDirection*/ -transform.up, out hit, rayLength))
+        Debug.DrawRay(transform.position, gravitationalDirection * rayLength, Color.red);
+        if (!Physics.Raycast(transform.position, gravitationalDirection /* -transform.up*/, out hit, rayLength))
         {
             diving = true;
             Debug.Log("Flying");
-            //playerAni.SetTrigger("Diving");
+            playerAni.SetBool("Diving", true);
             rb.drag = 0f;
         }
         else
         {
+            playerAni.SetBool("Diving", false);
             diving = false;
         }
+    }
+    void AnimationStates()
+    {
+        if (moveInput.magnitude > 0 && rb.velocity.magnitude > 0 && grounded)
+        {
+            playerAni.SetBool("Movement", true);
+        }
+        else if (moveInput.magnitude == 0 && grounded)
+        {
+            playerAni.SetBool("Movement", false);
+        }
+        playerAni.SetBool("Grounded", grounded);    
+
+    }
+    void SetSingleAnimation(string stateName)
+    {
+        foreach (string state in AnimationBools)
+        {
+            playerAni.SetBool(state, false);
+        }
+        playerAni.SetBool(stateName, true);
     }
     #endregion
     //Here goes any events called by the input system
@@ -234,7 +283,7 @@ public class NewPlayerController : MonoBehaviour
     {
         if(context.started)
         {
-            presslogged++;
+            
             shifted = true;
             if (!zerograv)
             {
@@ -242,15 +291,17 @@ public class NewPlayerController : MonoBehaviour
                 zerograv = true;
                 immobile = true;
                 grounded = false;
+                diving = false;
+                shiftDiving = false;
                 rb.freezeRotation = false;
                 rb.drag = zeroGravDrag;
-                playerAni.SetBool("Zero Grav", true);
+                SetSingleAnimation("Zero Grav");
             }
             else
             {
                 Vector3 cameraDirection = myCamera.transform.forward;
                 //OrientatePlayer(cameraDirection);
-                gravitationalRotation = myCamera.transform.forward;
+                gravitationalDirection = myCamera.transform.forward;
                 Vector3 newGravity = cameraDirection.normalized * gravityForce;
                 myGravity.force = newGravity;
                 zerograv = false;
@@ -272,7 +323,9 @@ public class NewPlayerController : MonoBehaviour
             immobile = false;
             rb.freezeRotation = true;
             gameObject.transform.rotation = Quaternion.Euler(0,gameObject.transform.rotation.y,0);
+            gravitationalDirection = -transform.up;
             shifted = false;
+            shiftDiving = false;
             myCameraOrientation.transform.rotation = Quaternion.Euler(0, 0, 0);
             playerAni.SetBool("Zero Grav", false);
         }
@@ -286,6 +339,7 @@ public class NewPlayerController : MonoBehaviour
         if (grounded)
         {
             rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
+            
         }
     }
     #endregion
