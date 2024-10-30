@@ -1,7 +1,6 @@
 using Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -14,7 +13,7 @@ public class NewPlayerController : MonoBehaviour
     [SerializeField] ConstantForce myGravity; 
     [SerializeField] Camera myCamera;
     [SerializeField] GameObject myCameraOrientation;
-    [SerializeField] CinemachineFreeLook myCameraCM;
+    [SerializeField] CinemachineFreeLook myCameraCm;
 
     [Header("Movement Variables")]
     [SerializeField] float gravityForce;
@@ -30,11 +29,15 @@ public class NewPlayerController : MonoBehaviour
     [SerializeField] float jumpForce;
     [SerializeField] float groundedDrag;
     [SerializeField] float zeroGravDrag;
+    [SerializeField] float diveRotationSpeed;
+    
     
     [Header("Debug elements to inspect")]
     [SerializeField] Vector2 moveInput;
     [SerializeField] Vector3 gravitationalDirection;
     [SerializeField] Vector3 loggedGravitationalDirection;
+    [SerializeField] Transform loggedCameraTransform;
+    [SerializeField] float rotateInput;
      
     
 
@@ -48,9 +51,8 @@ public class NewPlayerController : MonoBehaviour
     [SerializeField] bool grounded;
     [SerializeField] bool diving;
     [SerializeField] bool shiftDiving; //to be used only when toggling out from zero gravity, in order to smooth landing.
-    [SerializeField] List<string> AnimationBools;
-    
-
+    [SerializeField] bool cameraTransitioned;
+    [SerializeField] List<string> animationBools;
     #endregion
 
     // Start is called before the first frame update
@@ -81,9 +83,9 @@ public class NewPlayerController : MonoBehaviour
 
         }
         //otherchecks!
-        if(myCameraCM.m_YAxisRecentering.m_enabled == true && myCameraCM.m_YAxis.Value == 0.5f)
+        if(myCameraCm.m_YAxisRecentering.m_enabled && myCameraCm.m_YAxis.Value == 0.5f)
         {
-            myCameraCM.m_YAxisRecentering.m_enabled = false;
+            myCameraCm.m_YAxisRecentering.m_enabled = false;
         }
         Debug.DrawRay(myCameraOrientation.transform.position, myCameraOrientation.transform.up * 5f, Color.green);
 
@@ -141,34 +143,69 @@ public class NewPlayerController : MonoBehaviour
         }
         else if (!immobile && diving)
         {
+            if (transform.up == gravitationalDirection)
+            {
+                Debug.Log("Peak dive");
+                
+                if (!cameraTransitioned)
+                {
+                    CameraOrientationFix();
+                }
+                if (rotateInput != 0!)
+                {
+                    float rotationAmount = diveRotationSpeed * rotateInput * Time.deltaTime;
+                    transform.Rotate(0, rotationAmount, 0);
+                    cameraTransitioned = false;
+                }
+                //movement
+                Vector3 targetMovement = -transform.forward * moveInput.y + transform.right * moveInput.x;
+
+                if(targetMovement.magnitude > 0.1f)
+                {
+                    rb.AddForce(targetMovement * airDiveSpeed, ForceMode.Acceleration);
+                    myCameraCm.m_YAxisRecentering.m_enabled = true;
+                }
+                else
+                {
+                    myCameraCm.m_YAxisRecentering.m_enabled = false;
+                }
+            }
             if(rb.velocity.magnitude < maxDiveSpeed)
             {
                 //rb.AddForce(gravitationalDirection * diveAcceleration, ForceMode.Acceleration);
-                Debug.Log("Max Speed reached");
+                //Debug.Log("Max Speed reached");
             }
             Vector3 gravNormalized = gravitationalDirection.normalized;
             Quaternion targetRotation = Quaternion.FromToRotation(transform.up, gravNormalized) * transform.rotation;
             transform.rotation = Quaternion.RotateTowards(transform.rotation,targetRotation,  50f* Time.fixedDeltaTime);
             
-            //movement
-            Vector3 targetMovement = -transform.forward * moveInput.y + transform.right * moveInput.x;
 
-            if(targetMovement.magnitude > 0.1f)
-            {
-                rb.AddForce(targetMovement *airDiveSpeed, ForceMode.Acceleration);
-            }
             
 
         }
     }
     //Here go unique events that are triggered sometimes
     #region ReactionEvents
+    /*
     void OrientatePlayer(Vector3 gravityDirection)
     {
         Debug.Log("Updating");
         Quaternion targetRotation = Quaternion.FromToRotation(transform.up, -gravityDirection) * transform.rotation;
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
 
+    }
+    */
+    void CameraOrientationFix()
+    {
+        loggedCameraTransform = myCamera.transform;
+        myCameraCm.enabled = false;
+        myCameraOrientation.transform.rotation = Quaternion.LookRotation(transform.up, -transform.forward);
+        myCamera.transform.position = loggedCameraTransform.position;
+        myCamera.transform.rotation = loggedCameraTransform.rotation;
+        myCameraCm.enabled = true;
+        myCameraCm.m_YAxisRecentering.m_enabled = true;
+        cameraTransitioned = true;
+        
     }
     void SmoothLanding()
     {
@@ -199,7 +236,7 @@ public class NewPlayerController : MonoBehaviour
         }
     }
 
-    IEnumerator Landing(RaycastHit hit, float duration,bool landCamera)
+    IEnumerator Landing(RaycastHit hit, float duration,bool smoothGravity)
     {
         float elapsedTime = 0f;
         Quaternion targetRotation = Quaternion.FromToRotation(transform.up, hit.normal) * transform.rotation;
@@ -220,12 +257,12 @@ public class NewPlayerController : MonoBehaviour
         }
         transform.rotation = targetRotation;
         grounded = true;
-        if (landCamera)
+        Debug.Log("starting cameralerp");
+        StartCoroutine((CameraLerp(0.5f)));
+        if (smoothGravity)
         {
             Vector3 newGravity = -transform.up.normalized * gravityForce;
             myGravity.force = newGravity;
-            Debug.Log("starting cameralerp");
-            StartCoroutine((CameraLerp(0.5f)));
         }
         //gravity adjusting to surface
 
@@ -247,17 +284,15 @@ public class NewPlayerController : MonoBehaviour
         Debug.Log("camera lerp started");
         float elapsedTime = 0f;
         Quaternion startRotation = myCameraOrientation.transform.rotation;
-        Quaternion targetCameraRotation =
-            Quaternion.FromToRotation(myCameraOrientation.transform.up, transform.up) *
-            myCameraOrientation.transform.rotation;
+        Quaternion targetCameraRotation = Quaternion.FromToRotation(myCameraOrientation.transform.up, transform.up) *
+                                          myCameraOrientation.transform.rotation;
 
 
         while (elapsedTime < duration)
         {
             float t = Mathf.Clamp01(elapsedTime / duration);
 
-            myCameraOrientation.transform.rotation =
-                Quaternion.Slerp(startRotation, targetCameraRotation, elapsedTime / duration);
+            myCameraOrientation.transform.rotation = Quaternion.Slerp(startRotation, targetCameraRotation, t);
             Debug.Log($"Camera rotation: {myCameraOrientation.transform.localRotation}");
 
             elapsedTime += Time.deltaTime;
@@ -269,9 +304,9 @@ public class NewPlayerController : MonoBehaviour
         Debug.Log(("ending camera lerp"));
 
         myCameraOrientation.transform.rotation = targetCameraRotation;
-        myCameraCM.m_YAxisRecentering.m_enabled = true;
-        myCameraCM.m_YAxisRecentering.RecenterNow();
-
+        myCameraCm.m_YAxisRecentering.m_enabled = true;
+        myCameraCm.m_YAxisRecentering.RecenterNow();
+        cameraTransitioned = false;
         yield return null;
     }
     
@@ -298,11 +333,10 @@ public class NewPlayerController : MonoBehaviour
                 Debug.Log("Landed");
                 diving = false;
                 SetSingleAnimation("Grounded");
-                StartCoroutine(Landing(hit, .5f, false));
+                StartCoroutine(Landing(hit, .5f, true));
             }
             rb.drag = groundedDrag;
             grounded = true;
-            return;
         }
         else
         {
@@ -347,7 +381,7 @@ public class NewPlayerController : MonoBehaviour
     }
     void SetSingleAnimation(string stateName)
     {
-        foreach (string state in AnimationBools)
+        foreach (string state in animationBools)
         {
             playerAni.SetBool(state, false);
         }
@@ -418,6 +452,11 @@ public class NewPlayerController : MonoBehaviour
             rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
             
         }
+    }
+
+    public void AerialRotate(InputAction.CallbackContext context)
+    {
+        rotateInput = context.ReadValue<float>();
     }
     #endregion
 }

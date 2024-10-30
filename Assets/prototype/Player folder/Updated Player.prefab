@@ -760,27 +760,34 @@ MonoBehaviour:
   myGravity: {fileID: 4776158035026096381}
   myCamera: {fileID: 0}
   myCameraOrientation: {fileID: 0}
-  myCameraCM: {fileID: 0}
+  myCameraCm: {fileID: 0}
   gravityForce: 9.81
   moveSpeed: 0
   maxSpeedWalk: 0
+  jumpForwardSpeed: 0
+  airDiveSpeed: 0
+  maxDiveSpeed: 0
+  diveAcceleration: 0
   deceleration: 0
   rotationSpeed: 0
   cameraRotationSpeed: 0
   jumpForce: 0
   groundedDrag: 0
   zeroGravDrag: 0
+  diveRotationSpeed: 0
   moveInput: {x: 0, y: 0}
-  gravitationalRotation: {x: 0, y: 0, z: 0}
-  downDirection: {x: 0, y: 0, z: 0}
-  presslogged: 0
+  gravitationalDirection: {x: 0, y: 0, z: 0}
   loggedGravitationalDirection: {x: 0, y: 0, z: 0}
+  loggedCameraTransform: {fileID: 0}
+  rotateInput: 0
   zerograv: 0
   shifted: 0
   immobile: 0
   grounded: 0
   diving: 0
   shiftDiving: 0
+  cameraTransitioned: 0
+  animationBools: []
 --- !u!54 &8816082189579956960
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -857,15 +864,51 @@ MonoBehaviour:
       m_Calls: []
   m_ActionEvents:
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1915248459201015039}
+        m_TargetAssemblyTypeName: NewPlayerController, Assembly-CSharp
+        m_MethodName: OnMove
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 302ce534-f8c9-4e4e-8b42-643684d686f1
     m_ActionName: Player/Move[/Keyboard/w,/Keyboard/s,/Keyboard/d]
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1915248459201015039}
+        m_TargetAssemblyTypeName: NewPlayerController, Assembly-CSharp
+        m_MethodName: ToggleGrav
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: ecda71e9-9e82-4a19-b1ad-a72825d8c29f
     m_ActionName: Player/Switch[/Keyboard/f]
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1915248459201015039}
+        m_TargetAssemblyTypeName: NewPlayerController, Assembly-CSharp
+        m_MethodName: Revert
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 9fc6a834-78d9-4d84-9b43-ebfff8ec71f0
     m_ActionName: Player/Revert[/Keyboard/q]
   - m_PersistentCalls:
@@ -873,9 +916,37 @@ MonoBehaviour:
     m_ActionId: 74cbc0bd-dd3b-4a86-988a-2a68491ae537
     m_ActionName: Player/Pause[/Keyboard/tab]
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1915248459201015039}
+        m_TargetAssemblyTypeName: NewPlayerController, Assembly-CSharp
+        m_MethodName: OnJump
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 46dbcf43-11c0-47af-9c9b-4d8c4a2a52a9
     m_ActionName: Player/Jump[/Keyboard/space]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1915248459201015039}
+        m_TargetAssemblyTypeName: NewPlayerController, Assembly-CSharp
+        m_MethodName: AerialRotate
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 884aedcc-e857-48bf-8910-bf7524a1ca28
+    m_ActionName: Player/Diving Rotation[/Keyboard/q,/Keyboard/e]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
