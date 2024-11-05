@@ -820,8 +820,8 @@ MonoBehaviour:
   m_ActionEvents:
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: PlayerControllerCM, Assembly-CSharp
+      - m_Target: {fileID: -2724383346561695525}
+        m_TargetAssemblyTypeName: PlayerControllerDebug, Assembly-CSharp
         m_MethodName: OnMove
         m_Mode: 0
         m_Arguments:
@@ -836,9 +836,9 @@ MonoBehaviour:
     m_ActionName: Player/Move[/Keyboard/w,/Keyboard/s,/Keyboard/d]
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: PlayerControllerCM, Assembly-CSharp
-        m_MethodName: ToggleGrav
+      - m_Target: {fileID: -2724383346561695525}
+        m_TargetAssemblyTypeName: PlayerControllerDebug, Assembly-CSharp
+        m_MethodName: ToggleGravity
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -852,9 +852,9 @@ MonoBehaviour:
     m_ActionName: Player/Switch[/Keyboard/f]
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: PlayerControllerCM, Assembly-CSharp
-        m_MethodName: Revert
+      - m_Target: {fileID: -2724383346561695525}
+        m_TargetAssemblyTypeName: PlayerControllerDebug, Assembly-CSharp
+        m_MethodName: RevertGravity
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -872,8 +872,8 @@ MonoBehaviour:
     m_ActionName: Player/Pause[/Keyboard/tab]
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: PlayerControllerCM, Assembly-CSharp
+      - m_Target: {fileID: -2724383346561695525}
+        m_TargetAssemblyTypeName: PlayerControllerDebug, Assembly-CSharp
         m_MethodName: OnJump
         m_Mode: 0
         m_Arguments:
@@ -888,8 +888,8 @@ MonoBehaviour:
     m_ActionName: Player/Jump[/Keyboard/space]
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: PlayerControllerCM, Assembly-CSharp
+      - m_Target: {fileID: -2724383346561695525}
+        m_TargetAssemblyTypeName: PlayerControllerDebug, Assembly-CSharp
         m_MethodName: AerialRotate
         m_Mode: 0
         m_Arguments:

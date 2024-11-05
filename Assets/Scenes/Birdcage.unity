@@ -157,8 +157,8 @@ MonoBehaviour:
   lookAt: {fileID: 514836990}
   distance: 5
   rotationSpeed: 5
-  yMaxLimit: 140
-  yMinLimit: 40
+  yMaxLimit: 80
+  yMinLimit: -80
   mouseInput: {x: 0, y: 0}
   myOrientation: {fileID: 1284682128}
   centrePoint: {fileID: 0}
@@ -417,7 +417,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 25678126}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.5863745, y: 0.00000019312857, z: -0.00000013980258, w: 0.81004006}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -634,8 +634,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 117266445}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.60097337, y: 0.00000007396914, z: -0.00000005561766, w: 0.7992691}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: 0.45639977, y: -0.5199917, z: 0.39098367, w: 0.60699236}
+  m_LocalPosition: {x: 0, y: 0, z: -0.00000023841858}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2376,6 +2376,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 963194227}
     - target: {fileID: -2724383346561695525, guid: 23e8bdd0706077c46b72931237553dfa, type: 3}
+      propertyPath: jumpForce
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: -2724383346561695525, guid: 23e8bdd0706077c46b72931237553dfa, type: 3}
       propertyPath: myCameraCm
       value: 
       objectReference: {fileID: 1918656914}
@@ -2429,7 +2433,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5533189622618693888, guid: 23e8bdd0706077c46b72931237553dfa, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3488,8 +3492,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 820309349}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.61541224, y: -0.000000013637357, z: 0.000000010647771, w: 0.78820544}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: 0.46736515, y: -0.5127939, z: 0.4003774, w: 0.59859025}
+  m_LocalPosition: {x: 0, y: 0, z: -0.00000023841858}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3687,8 +3691,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.61541224, y: 0, z: 0, w: 0.78820544}
-  m_LocalPosition: {x: -1.2299789, y: 63.64, z: -3}
+  m_LocalRotation: {x: 0.46736518, y: -0.51279384, z: 0.40037733, w: 0.59859025}
+  m_LocalPosition: {x: -15.101849, y: 63.69, z: 2.926519}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4187,11 +4191,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1262338167}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
---- !u!4 &1278735524 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 1775930098728802629, guid: b33dc58575b515249b93423d36fba241, type: 3}
-  m_PrefabInstance: {fileID: 2132253922}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1284682127
 GameObject:
   m_ObjectHideFlags: 0
@@ -5338,8 +5337,8 @@ MonoBehaviour:
   m_StreamingVersion: 20170927
   m_Priority: 10
   m_StandbyUpdate: 2
-  m_LookAt: {fileID: 1278735524}
-  m_Follow: {fileID: 1278735524}
+  m_LookAt: {fileID: 514836990}
+  m_Follow: {fileID: 514836990}
   m_CommonLens: 1
   m_Lens:
     FieldOfView: 40
@@ -5434,7 +5433,7 @@ Transform:
   m_GameObject: {fileID: 1918656913}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.2299789, y: 63.64, z: -3}
+  m_LocalPosition: {x: -15.101849, y: 63.69, z: 2.926519}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -6406,7 +6405,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5533189622618693888, guid: b33dc58575b515249b93423d36fba241, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

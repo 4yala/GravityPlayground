@@ -60,7 +60,8 @@ public class PlayerControllerCM : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         myCamera = FindFirstObjectByType<Camera>();
-        
+        myCameraCm.LookAt = transform;
+        myCameraCm.Follow = transform;
         gravitationalDirection = -transform.up;
     }
 
@@ -434,6 +435,7 @@ public class PlayerControllerCM : MonoBehaviour
     }
     public void OnJump(InputAction.CallbackContext context)
     {
+        
         if (grounded)
         {
             rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);

@@ -57,6 +57,8 @@ public class PlayerControllerDebug : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         gravitationalDirection = Vector3.down;
+        myCameraCm.LookAt = transform;
+        myCameraCm.Follow = transform;
     }
 
     // Update is called once per frame
@@ -93,11 +95,11 @@ public class PlayerControllerDebug : MonoBehaviour
                 Vector3 cameraRight = Vector3.ProjectOnPlane(myCamera.transform.right, myCameraOrientation.transform.up);
                 
                 //translate a character direction based on input
-                Vector3 targetDirection = (cameraForward * moveInput.y  + cameraRight * moveInput.y).normalized;
+                Vector3 targetDirection = (cameraForward * moveInput.y  + cameraRight * moveInput.x).normalized;
                 
                 //calculate and make the player face the direction
                 Quaternion targetRotation = Quaternion.LookRotation(targetDirection, myCameraOrientation.transform.up);
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime);
                 
                 //finalise with character forward movement only, no strafing
                 if (grounded)
@@ -150,13 +152,19 @@ public class PlayerControllerDebug : MonoBehaviour
 
                 //properly implement terminal velocity later
                 //if up velocity > max dive speed.....
+                //dot product = q
+                //velocity.magnitude  * cos q
+                //get velocity towards gravitational direction
+                //checker then apply or stop applying force until terminal velocity
+                
                 
                 //double checker, not sure if this is necessary
                 //gravitational direction is already between 1- and 1, but normalize rounds it up to 2 decimals?
-                Vector3 gravNormalized = gravitationalDirection.normalized;
-                Quaternion targetRotation = Quaternion.FromToRotation(transform.up, gravNormalized) * transform.rotation;
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 50f * Time.fixedDeltaTime);
+
             }
+            Vector3 gravNormalized = gravitationalDirection.normalized;
+            Quaternion targetRotation = Quaternion.FromToRotation(transform.up, gravNormalized) * transform.rotation;
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 50f * Time.fixedDeltaTime);
             
         }
     }
@@ -194,12 +202,15 @@ public class PlayerControllerDebug : MonoBehaviour
         //double checkers
         rb.freezeRotation = true;
         transform.rotation = targetRotation;
+        Debug.Log(hit.normal);
+        Debug.Log(transform.up);
         //set status
         grounded = true;
         if (smoothGravity)
         {
             Vector3 newGravity = gravitationalDirection.normalized * gravityForce;
             myGravity.force = newGravity;
+            shiftDiving = false;
         }
         //now move on to do camera
         StartCoroutine(OrientateCamera(0.5f, transform.up, true));
@@ -257,7 +268,7 @@ public class PlayerControllerDebug : MonoBehaviour
                 SetSingleAnimation("Grounded");
                 StartCoroutine(LandPlayer(hit,.5f, shiftDiving));
             }
-            else if (!diving && transform.up != -gravitationalDirection)
+            else if (!diving && transform.up != -gravitationalDirection && !grounded)
             {
                 StartCoroutine(LandPlayer(hit,.5f, shiftDiving));
             }
@@ -268,7 +279,7 @@ public class PlayerControllerDebug : MonoBehaviour
         else
         {
             grounded = false;
-            if (transform.up != -gravitationalDirection)
+            if (transform.up != -gravitationalDirection && !diving)
             {
                 Debug.Log("Attempt to correct player!");
             }
@@ -288,6 +299,8 @@ public class PlayerControllerDebug : MonoBehaviour
         }
         else
         {
+            //unnecessary??
+            playerAni.SetBool("Diving", false);
             diving = false;
         }
     }
@@ -300,7 +313,7 @@ public class PlayerControllerDebug : MonoBehaviour
         {
             playerAni.SetBool("Movement", true);
         }
-        else if (moveInput.magnitude > 0 && grounded)
+        else if (moveInput.magnitude == 0 && grounded)
         {
             playerAni.SetBool("Movement", false);
         }
@@ -325,9 +338,11 @@ public class PlayerControllerDebug : MonoBehaviour
         {
             if (grounded)
             {
+                rb.drag = 0f;
                 rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             }
         }
+
     }
     public void RevertGravity(InputAction.CallbackContext context)
     {
@@ -342,6 +357,7 @@ public class PlayerControllerDebug : MonoBehaviour
             //configure states to correct player status no matter what scenario
             rb.freezeRotation = true;
             myGravity.force = Vector3.down * gravityForce;
+            gravitationalDirection = Vector3.down;
             zerograv = false;
             immobile = false;
             shifted = false;
@@ -372,6 +388,7 @@ public class PlayerControllerDebug : MonoBehaviour
                 rb.freezeRotation = false;
                 rb.drag = zeroGravDrag;
                 Debug.Log("Missing function!");
+                SetSingleAnimation("Zero Grav");
                 //SetSingleAnimation("Zero Grav");
                 //fix camera with coroutine
             }

@@ -32,7 +32,7 @@ public class OrbitalCamera : MonoBehaviour
 
     void LateUpdate()
     {
-        
+        /*
         if (!lookAt)
         {
             return;
@@ -52,20 +52,20 @@ public class OrbitalCamera : MonoBehaviour
         //Debug.Log(angleFromUp);
         
         //fix angles at y axis
-        if (angleFromUp > yMaxLimit /*&& mouseInput.y > 0*/)
+        if (angleFromUp > yMaxLimit /*&& mouseInput.y > 0/)
         {
             cameraRotation = Quaternion.AngleAxis(yMaxLimit, right) *
                              Quaternion.LookRotation(Vector3.ProjectOnPlane(forward, right), myOrientation.up);
             Debug.Log("max reached");
         }
-        else if (angleFromUp < yMinLimit /*&& mouseInput.y > 0*/)
+        else if (angleFromUp < yMinLimit /*&& mouseInput.y > 0/)
         {
             cameraRotation =  Quaternion.AngleAxis(yMinLimit, right) *
                               Quaternion.LookRotation(Vector3.ProjectOnPlane(forward, right), myOrientation.up);
             Debug.Log("minimum reached");
         }
+        */
         
-        /*
         if (!lookAt)
         {
             return;
@@ -82,7 +82,7 @@ public class OrbitalCamera : MonoBehaviour
         Quaternion verticalRotation = Quaternion.AngleAxis(angleY, dynamicRight);
         
         cameraRotation = horizontalRotation * verticalRotation;
-        */
+        
         
         transform.position = lookAt.position - (cameraRotation * Vector3.forward) * distance;
         transform.LookAt(lookAt, myOrientation.up);
