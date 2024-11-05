@@ -714,14 +714,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1775930098728802629}
-  - component: {fileID: 1915248459201015039}
   - component: {fileID: 8816082189579956960}
   - component: {fileID: 495605094965408285}
   - component: {fileID: 4233914996021639070}
   - component: {fileID: 5893414150438550563}
   - component: {fileID: 4776158035026096381}
+  - component: {fileID: -2724383346561695525}
   m_Layer: 8
-  m_Name: Updated Player
+  m_Name: PlayerCM debugged
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -743,51 +743,6 @@ Transform:
   - {fileID: 2679887051063414544}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1915248459201015039
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5533189622618693888}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d1f3991b28249694aba09e3baa94068e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  rb: {fileID: 8816082189579956960}
-  playerAni: {fileID: 0}
-  myGravity: {fileID: 4776158035026096381}
-  myCamera: {fileID: 0}
-  myCameraOrientation: {fileID: 0}
-  myCameraCm: {fileID: 0}
-  gravityForce: 9.81
-  moveSpeed: 0
-  maxSpeedWalk: 0
-  jumpForwardSpeed: 0
-  airDiveSpeed: 0
-  maxDiveSpeed: 0
-  diveAcceleration: 0
-  deceleration: 0
-  rotationSpeed: 0
-  cameraRotationSpeed: 0
-  jumpForce: 0
-  groundedDrag: 0
-  zeroGravDrag: 0
-  diveRotationSpeed: 0
-  moveInput: {x: 0, y: 0}
-  gravitationalDirection: {x: 0, y: 0, z: 0}
-  loggedGravitationalDirection: {x: 0, y: 0, z: 0}
-  loggedCameraTransform: {fileID: 0}
-  rotateInput: 0
-  zerograv: 0
-  shifted: 0
-  immobile: 0
-  grounded: 0
-  diving: 0
-  shiftDiving: 0
-  cameraTransitioned: 0
-  animationBools: []
 --- !u!54 &8816082189579956960
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -797,7 +752,7 @@ Rigidbody:
   m_GameObject: {fileID: 5533189622618693888}
   serializedVersion: 4
   m_Mass: 1
-  m_Drag: 0
+  m_Drag: 2.5
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -865,8 +820,8 @@ MonoBehaviour:
   m_ActionEvents:
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1915248459201015039}
-        m_TargetAssemblyTypeName: NewPlayerController, Assembly-CSharp
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: PlayerControllerCM, Assembly-CSharp
         m_MethodName: OnMove
         m_Mode: 0
         m_Arguments:
@@ -881,8 +836,8 @@ MonoBehaviour:
     m_ActionName: Player/Move[/Keyboard/w,/Keyboard/s,/Keyboard/d]
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1915248459201015039}
-        m_TargetAssemblyTypeName: NewPlayerController, Assembly-CSharp
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: PlayerControllerCM, Assembly-CSharp
         m_MethodName: ToggleGrav
         m_Mode: 0
         m_Arguments:
@@ -897,8 +852,8 @@ MonoBehaviour:
     m_ActionName: Player/Switch[/Keyboard/f]
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1915248459201015039}
-        m_TargetAssemblyTypeName: NewPlayerController, Assembly-CSharp
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: PlayerControllerCM, Assembly-CSharp
         m_MethodName: Revert
         m_Mode: 0
         m_Arguments:
@@ -917,8 +872,8 @@ MonoBehaviour:
     m_ActionName: Player/Pause[/Keyboard/tab]
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1915248459201015039}
-        m_TargetAssemblyTypeName: NewPlayerController, Assembly-CSharp
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: PlayerControllerCM, Assembly-CSharp
         m_MethodName: OnJump
         m_Mode: 0
         m_Arguments:
@@ -933,8 +888,8 @@ MonoBehaviour:
     m_ActionName: Player/Jump[/Keyboard/space]
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1915248459201015039}
-        m_TargetAssemblyTypeName: NewPlayerController, Assembly-CSharp
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: PlayerControllerCM, Assembly-CSharp
         m_MethodName: AerialRotate
         m_Mode: 0
         m_Arguments:
@@ -947,6 +902,10 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 884aedcc-e857-48bf-8910-bf7524a1ca28
     m_ActionName: Player/Diving Rotation[/Keyboard/q,/Keyboard/e]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: f0469eb4-7404-4d5a-8e36-035f737bc255
+    m_ActionName: Player/CameraMove[/Mouse/delta]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -985,6 +944,54 @@ ConstantForce:
   m_RelativeForce: {x: 0, y: 0, z: 0}
   m_Torque: {x: 0, y: 0, z: 0}
   m_RelativeTorque: {x: 0, y: 0, z: 0}
+--- !u!114 &-2724383346561695525
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5533189622618693888}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2116789600b28c4392c9b6458ec49f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rb: {fileID: 8816082189579956960}
+  playerAni: {fileID: 5893414150438550563}
+  myGravity: {fileID: 4776158035026096381}
+  myCamera: {fileID: 0}
+  myCameraOrientation: {fileID: 0}
+  myCameraCm: {fileID: 0}
+  gravityForce: 9.81
+  moveSpeed: 20
+  maxSpeedWalk: 10
+  deceleration: 20
+  rotationSpeed: 1000
+  jumpForce: 3
+  groundedDrag: 2.5
+  zeroGravDrag: 3
+  freeFallDrag: 3
+  jumpForwardSpeed: 5
+  airDiveSpeed: 5
+  maxDiveSpeed: 50
+  diveAcceleration: 1
+  diveRotationSpeed: 50
+  moveInput: {x: 0, y: 0}
+  gravitationalDirection: {x: 0, y: 0, z: 0}
+  rotateInput: 0
+  diveLength: 15
+  zerograv: 0
+  shifted: 0
+  immobile: 0
+  grounded: 0
+  diving: 0
+  shiftDiving: 0
+  cameraTransitioned: 0
+  animationBools:
+  - Movement
+  - Zero Grav
+  - Grounded
+  - Diving
 --- !u!1 &5874129796454649584
 GameObject:
   m_ObjectHideFlags: 0

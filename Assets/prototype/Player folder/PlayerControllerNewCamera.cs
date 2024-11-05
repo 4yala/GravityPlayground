@@ -4,13 +4,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class NewPlayerController : MonoBehaviour
+public class PlayerControllerNewCamera : MonoBehaviour
 {
     #region Variables
     [Header ("Player components")]
     [SerializeField] Rigidbody rb;
     [SerializeField] Animator playerAni;
     [SerializeField] ConstantForce myGravity; 
+    [Header(("Camera components"))]
     [SerializeField] Camera myCamera;
     [SerializeField] GameObject myCameraOrientation;
     [SerializeField] CinemachineFreeLook myCameraCm;
@@ -83,12 +84,14 @@ public class NewPlayerController : MonoBehaviour
 
         }
         //otherchecks!
-        if(myCameraCm.m_YAxisRecentering.m_enabled && myCameraCm.m_YAxis.Value == 0.5f)
+        if (myCameraCm)
         {
-            myCameraCm.m_YAxisRecentering.m_enabled = false;
+            if(myCameraCm.m_YAxisRecentering.m_enabled && myCameraCm.m_YAxis.Value == 0.5f)
+            {
+                myCameraCm.m_YAxisRecentering.m_enabled = false;
+            }
+            Debug.DrawRay(myCameraOrientation.transform.position, myCameraOrientation.transform.up * 5f, Color.green);
         }
-        Debug.DrawRay(myCameraOrientation.transform.position, myCameraOrientation.transform.up * 5f, Color.green);
-
     }
 
     // FixedUpdate for non frame dependent functions, I.e. physics
@@ -163,11 +166,11 @@ public class NewPlayerController : MonoBehaviour
                 if(targetMovement.magnitude > 0.1f)
                 {
                     rb.AddForce(targetMovement * airDiveSpeed, ForceMode.Acceleration);
-                    myCameraCm.m_YAxisRecentering.m_enabled = true;
+                    //myCameraCm.m_YAxisRecentering.m_enabled = true;
                 }
                 else
                 {
-                    myCameraCm.m_YAxisRecentering.m_enabled = false;
+                    //myCameraCm.m_YAxisRecentering.m_enabled = false;
                 }
             }
             if(rb.velocity.magnitude < maxDiveSpeed)
@@ -198,12 +201,12 @@ public class NewPlayerController : MonoBehaviour
     void CameraOrientationFix()
     {
         loggedCameraTransform = myCamera.transform;
-        myCameraCm.enabled = false;
+        //myCameraCm.enabled = false;
         myCameraOrientation.transform.rotation = Quaternion.LookRotation(transform.up, -transform.forward);
         myCamera.transform.position = loggedCameraTransform.position;
         myCamera.transform.rotation = loggedCameraTransform.rotation;
-        myCameraCm.enabled = true;
-        myCameraCm.m_YAxisRecentering.m_enabled = true;
+        //myCameraCm.enabled = true;
+        //myCameraCm.m_YAxisRecentering.m_enabled = true;
         cameraTransitioned = true;
         
     }
@@ -304,9 +307,10 @@ public class NewPlayerController : MonoBehaviour
         Debug.Log(("ending camera lerp"));
 
         myCameraOrientation.transform.rotation = targetCameraRotation;
-        myCameraCm.m_YAxisRecentering.m_enabled = true;
-        myCameraCm.m_YAxisRecentering.RecenterNow();
-        cameraTransitioned = false;
+        //myCamera.GetComponent<NewCamera>().SetNewUp();
+        //myCameraCm.m_YAxisRecentering.m_enabled = true;
+        //myCameraCm.m_YAxisRecentering.RecenterNow();
+        //cameraTransitioned = false;
         yield return null;
     }
     

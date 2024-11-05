@@ -58,6 +58,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "CameraMove",
+                    "type": "Value",
+                    "id": "f0469eb4-7404-4d5a-8e36-035f737bc255",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -179,6 +188,17 @@
                     "processors": "Scale(factor=-1)",
                     "groups": "",
                     "action": "Diving Rotation",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b619e1c2-74d9-4d9c-b471-04d00cfa7e35",
+                    "path": "<Mouse>/delta",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CameraMove",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
