@@ -34,12 +34,14 @@ public class PlayerControllerDebug : MonoBehaviour
     [SerializeField] float maxDiveSpeed;
     [SerializeField] float diveAcceleration;
     [SerializeField] float diveRotationSpeed;
+    [SerializeField] float diveCameraRotationSpeed;
     
     [Header("Debug elements to inspect")]
     [SerializeField] Vector2 moveInput;
     [SerializeField] Vector3 gravitationalDirection;
     [SerializeField] float rotateInput;
     [SerializeField] float diveLength;
+    [SerializeField] bool requireRecentre;
     
     [Header("Player States")]
     [SerializeField] bool zerograv;
@@ -51,6 +53,10 @@ public class PlayerControllerDebug : MonoBehaviour
     [SerializeField] bool cameraTransitioned;
     [SerializeField] List<string> animationBools;
     #endregion
+    
+    
+    
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -84,6 +90,9 @@ public class PlayerControllerDebug : MonoBehaviour
         //relatively grounded movement (including jumping motion)
         if (!immobile && !diving)
         {
+            //remove later
+            myCameraCm.m_YAxisRecentering.m_enabled = false;
+            
             //gather input information
             Vector3 inputDirection = new Vector3(moveInput.x, 0, moveInput.y).normalized;
             
@@ -126,15 +135,39 @@ public class PlayerControllerDebug : MonoBehaviour
             //movement is enabled when character is in proper position (head first)
             if (transform.up == gravitationalDirection)
             {
-                Debug.Log("missing function");
                 //fix camera
-                //myorientationrotatetowardsmaybe
+                Quaternion cameraTargetDirection = Quaternion.LookRotation(transform.up, -transform.forward);
+                myCameraOrientation.transform.rotation = Quaternion.RotateTowards(myCameraOrientation.transform.rotation, cameraTargetDirection, diveCameraRotationSpeed * Time.fixedDeltaTime);
+                
+                //recentre the camera ONCE after it begins diving.
+                if (myCameraOrientation.transform.forward == transform.up)
+                {
+                    //vvvvvv
+                    if (requireRecentre)
+                    {
+                        myCameraCm.m_YAxisRecentering.m_enabled = true;
+                        myCameraCm.m_YAxis.Value = 0.5f;
+                        Debug.Log("recentering");
+                        Debug.Log(myCameraCm.m_YAxisRecentering.m_enabled);
+                        //check when its enabled
+                    }
+                    if (requireRecentre && myCameraCm.m_YAxis.Value == 0.5f)
+                    {
+                        myCameraCm.m_YAxisRecentering.m_enabled = false;
+                        Debug.Log("finished recentering");
+                        requireRecentre = false;
+                    }
+                    //^^^^^^^^^
+
+                }
+
                 //check if there's active input for character rotation
                 if (rotateInput != 0)
                 {
                     float rotationAmount = diveRotationSpeed * rotateInput * Time.deltaTime;
                     transform.Rotate(0, rotationAmount, 0);
                     //fix camera when it rotates??
+                    myCameraCm.m_YAxisRecentering.m_enabled = true;
                 }
                 
                 //calculate movement
@@ -143,11 +176,11 @@ public class PlayerControllerDebug : MonoBehaviour
                 if (targetMovement.magnitude > 0.1f)
                 {
                     rb.AddForce(targetMovement * airDiveSpeed, ForceMode.Acceleration);
-                    //attempt to lock camera when movement
+                    myCameraCm.m_YAxisRecentering.m_enabled = true;
                 }
-                else
+                if(rotateInput == 0 && targetMovement.magnitude <= 0)
                 {
-                    //release camera, no function yet
+                    myCameraCm.m_YAxisRecentering.m_enabled = false;
                 }
 
                 //properly implement terminal velocity later
@@ -296,6 +329,7 @@ public class PlayerControllerDebug : MonoBehaviour
             Debug.Log("Triggering dive");
             playerAni.SetBool("Diving", true);
             rb.drag = freeFallDrag;
+            requireRecentre = true;
         }
         else
         {
@@ -334,12 +368,13 @@ public class PlayerControllerDebug : MonoBehaviour
     }
     public void OnJump(InputAction.CallbackContext context)
     {
+        
         if (context.started)
         {
             if (grounded)
             {
                 rb.drag = 0f;
-                rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+                rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
             }
         }
 

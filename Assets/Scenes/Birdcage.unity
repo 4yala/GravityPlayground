@@ -417,7 +417,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 25678126}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0.44531295, y: -0.5269991, z: 0.38148594, w: 0.6151722}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -2387,6 +2387,10 @@ PrefabInstance:
       propertyPath: myCameraOrientation
       value: 
       objectReference: {fileID: 639518425}
+    - target: {fileID: -2724383346561695525, guid: 23e8bdd0706077c46b72931237553dfa, type: 3}
+      propertyPath: diveCameraRotationSpeed
+      value: 1000
+      objectReference: {fileID: 0}
     - target: {fileID: 1775930098728802629, guid: 23e8bdd0706077c46b72931237553dfa, type: 3}
       propertyPath: m_LocalPosition.x
       value: 2.9033227
