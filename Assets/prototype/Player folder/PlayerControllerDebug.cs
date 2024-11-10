@@ -4,13 +4,21 @@ using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
 using UnityEngine.InputSystem;
+[RequireComponent(typeof(CustomGravity))]
 public class PlayerControllerDebug : MonoBehaviour
 {
     #region Variables
     [Header ("Player components")]
     [SerializeField] Rigidbody rb;
     [SerializeField] Animator playerAni;
-    [SerializeField] ConstantForce myGravity; 
+    [SerializeField] CustomGravity gravity;
+    
+    //abandon
+    //[SerializeField] ConstantForce myGravity; 
+    //
+    
+    [SerializeField] GravityField gravityField;
+
     
     [Header(("Camera components"))]
     [SerializeField] Camera myCamera;
@@ -18,7 +26,7 @@ public class PlayerControllerDebug : MonoBehaviour
     [SerializeField] CinemachineFreeLook myCameraCm;
 
     [Header("Grounded Movement Variables")]
-    [SerializeField] float gravityForce;
+    //[SerializeField] float gravityForce;
     [SerializeField] float moveSpeed;
     [SerializeField] float maxSpeedWalk;
     [SerializeField] float deceleration;
@@ -38,7 +46,9 @@ public class PlayerControllerDebug : MonoBehaviour
     
     [Header("Debug elements to inspect")]
     [SerializeField] Vector2 moveInput;
-    [SerializeField] Vector3 gravitationalDirection;
+    //remove?
+    //[SerializeField] Vector3 gravitationalDirection;
+    //remove
     [SerializeField] float rotateInput;
     [SerializeField] float diveLength;
     [SerializeField] bool requireRecentre;
@@ -51,20 +61,21 @@ public class PlayerControllerDebug : MonoBehaviour
     [SerializeField] bool diving;
     [SerializeField] bool shiftDiving; //to be used only when toggling out from zero gravity, in order to smooth landing.
     [SerializeField] bool cameraTransitioned;
+    [SerializeField] bool fieldEnabled;
+    [SerializeField] bool aimedDownSights;
     [SerializeField] List<string> animationBools;
     #endregion
-    
-    
-    
-    
+
     // Start is called before the first frame update
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        gravitationalDirection = Vector3.down;
+        gravity = GetComponent<CustomGravity>();
+        //gravitationalDirection = Vector3.down;
         myCameraCm.LookAt = transform;
         myCameraCm.Follow = transform;
+        gravityField.gameObject.SetActive(fieldEnabled);
     }
 
     // Update is called once per frame
@@ -92,6 +103,7 @@ public class PlayerControllerDebug : MonoBehaviour
         {
             //remove later
             myCameraCm.m_YAxisRecentering.m_enabled = false;
+            gravityField.transform.up = transform.up;
             
             //gather input information
             Vector3 inputDirection = new Vector3(moveInput.x, 0, moveInput.y).normalized;
@@ -133,11 +145,12 @@ public class PlayerControllerDebug : MonoBehaviour
         else if (!immobile && diving)
         {
             //movement is enabled when character is in proper position (head first)
-            if (transform.up == gravitationalDirection)
+            if (transform.up == gravity.gravitationalDirection)
             {
                 //fix camera
                 Quaternion cameraTargetDirection = Quaternion.LookRotation(transform.up, -transform.forward);
                 myCameraOrientation.transform.rotation = Quaternion.RotateTowards(myCameraOrientation.transform.rotation, cameraTargetDirection, diveCameraRotationSpeed * Time.fixedDeltaTime);
+                gravityField.transform.up = -transform.forward;
                 
                 //recentre the camera ONCE after it begins diving.
                 if (myCameraOrientation.transform.forward == transform.up)
@@ -195,11 +208,15 @@ public class PlayerControllerDebug : MonoBehaviour
                 //gravitational direction is already between 1- and 1, but normalize rounds it up to 2 decimals?
 
             }
-            Vector3 gravNormalized = gravitationalDirection.normalized;
-            Quaternion targetRotation = Quaternion.FromToRotation(transform.up, gravNormalized) * transform.rotation;
+            Quaternion targetRotation = Quaternion.FromToRotation(transform.up, gravity.gravitationalDirection) * transform.rotation;
             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 50f * Time.fixedDeltaTime);
             
         }
+        else if (zerograv)
+        {
+            gravityField.transform.up = myCamera.transform.up;
+        }
+        gravityField.transform.position = transform.position;
     }
     
     //Events that are called upon to make changes
@@ -214,12 +231,13 @@ public class PlayerControllerDebug : MonoBehaviour
         if (smoothGravity)
         {
             targetRotation = Quaternion.FromToRotation(transform.up, hit.normal) * transform.rotation;
-            gravitationalDirection = -hit.normal;
+            gravity.SoftSetGravity(-hit.normal);
+            //gravitationalDirection = -hit.normal;
         }
         //retain current direction
         else
         {
-            targetRotation = Quaternion.FromToRotation(transform.up, -gravitationalDirection.normalized) * transform.rotation;
+            targetRotation = Quaternion.FromToRotation(transform.up, -gravity.gravitationalDirection) * transform.rotation;
         }
         
         Quaternion startRotation = transform.rotation;
@@ -233,7 +251,7 @@ public class PlayerControllerDebug : MonoBehaviour
             yield return null;
         }
         //double checkers
-        rb.freezeRotation = true;
+        //rb.freezeRotation = true;
         transform.rotation = targetRotation;
         Debug.Log(hit.normal);
         Debug.Log(transform.up);
@@ -241,8 +259,12 @@ public class PlayerControllerDebug : MonoBehaviour
         grounded = true;
         if (smoothGravity)
         {
-            Vector3 newGravity = gravitationalDirection.normalized * gravityForce;
-            myGravity.force = newGravity;
+
+            gravity.SetNewGravity(gravity.gravitationalDirection, true,groundedDrag);
+            //all does this ^^
+            //Vector3 newGravity = gravitationalDirection.normalized * gravityForce;
+            //myGravity.force = newGravity;
+            
             shiftDiving = false;
         }
         //now move on to do camera
@@ -289,9 +311,9 @@ public class PlayerControllerDebug : MonoBehaviour
     {
         RaycastHit hit;
         float rayLength = 1.1f;
-        Debug.DrawRay(transform.position, gravitationalDirection * rayLength, Color.green);
+        Debug.DrawRay(transform.position, gravity.gravitationalDirection * rayLength, Color.green);
         //when ground is found
-        if (Physics.Raycast(transform.position, gravitationalDirection, out hit, rayLength))
+        if (Physics.Raycast(transform.position, gravity.gravitationalDirection, out hit, rayLength))
         {
             //apply landing functions if player should be diving
             if (diving)
@@ -301,7 +323,7 @@ public class PlayerControllerDebug : MonoBehaviour
                 SetSingleAnimation("Grounded");
                 StartCoroutine(LandPlayer(hit,.5f, shiftDiving));
             }
-            else if (!diving && transform.up != -gravitationalDirection && !grounded)
+            else if (!diving && transform.up != -gravity.gravitationalDirection && !grounded)
             {
                 StartCoroutine(LandPlayer(hit,.5f, shiftDiving));
             }
@@ -312,7 +334,7 @@ public class PlayerControllerDebug : MonoBehaviour
         else
         {
             grounded = false;
-            if (transform.up != -gravitationalDirection && !diving)
+            if (transform.up != -gravity.gravitationalDirection && !diving)
             {
                 Debug.Log("Attempt to correct player!");
             }
@@ -322,8 +344,8 @@ public class PlayerControllerDebug : MonoBehaviour
     void CheckDive()
     {
         RaycastHit hit;
-        Debug.DrawRay(transform.position, gravitationalDirection * diveLength, Color.red);
-        if (!Physics.Raycast(transform.position, gravitationalDirection, out hit, diveLength))
+        Debug.DrawRay(transform.position, gravity.gravitationalDirection * diveLength, Color.red);
+        if (!Physics.Raycast(transform.position, gravity.gravitationalDirection, out hit, diveLength))
         {
             diving = true;
             Debug.Log("Triggering dive");
@@ -337,6 +359,11 @@ public class PlayerControllerDebug : MonoBehaviour
             playerAni.SetBool("Diving", false);
             diving = false;
         }
+    }
+    //orientate field
+    void OrientateField()
+    {
+        
     }
     
     //check corresponding animation states
@@ -379,6 +406,10 @@ public class PlayerControllerDebug : MonoBehaviour
         }
 
     }
+    public void AerialRotate(InputAction.CallbackContext context)
+    {
+        rotateInput = context.ReadValue<float>();
+    }
     public void RevertGravity(InputAction.CallbackContext context)
     {
         //do only once
@@ -390,9 +421,14 @@ public class PlayerControllerDebug : MonoBehaviour
             }
         
             //configure states to correct player status no matter what scenario
-            rb.freezeRotation = true;
-            myGravity.force = Vector3.down * gravityForce;
-            gravitationalDirection = Vector3.down;
+            gravity.RevertGravity(true,freeFallDrag);
+            //all happens here ^^^
+            //rb.freezeRotation = true;
+            //myGravity.force = Vector3.down * gravityForce;
+            //gravitationalDirection = Vector3.down;
+            //rb.drag = freeFallDrag;
+            
+            
             zerograv = false;
             immobile = false;
             shifted = false;
@@ -400,7 +436,7 @@ public class PlayerControllerDebug : MonoBehaviour
             playerAni.SetBool("Zero Grav", false);
         
             //distinguish a way to recalculate orientation when falling?
-            rb.drag = freeFallDrag;
+            
         }
     }
     public void ToggleGravity(InputAction.CallbackContext context)
@@ -412,7 +448,13 @@ public class PlayerControllerDebug : MonoBehaviour
             if (!zerograv)
             {
                 //disable gravitational forces
-                myGravity.force *= 0f;
+                //use new gravity component
+                gravity.SetZeroGravity(zeroGravDrag);
+                //^^ all happens here
+                //myGravity.force *= 0f;
+                //rb.freezeRotation = false;
+                //rb.drag = zeroGravDrag;
+                
                 
                 //immobilise player
                 immobile = true;
@@ -420,34 +462,87 @@ public class PlayerControllerDebug : MonoBehaviour
                 grounded = false;
                 diving = false;
                 shiftDiving = false;
-                rb.freezeRotation = false;
-                rb.drag = zeroGravDrag;
-                Debug.Log("Missing function!");
+                
+
                 SetSingleAnimation("Zero Grav");
-                //SetSingleAnimation("Zero Grav");
                 //fix camera with coroutine
             }
             else
             {
                 //calculate new gravity
                 Vector3 cameraDirection = myCamera.transform.forward;
-                gravitationalDirection = cameraDirection;
-                Vector3 newGravity = cameraDirection.normalized * gravityForce;
-                myGravity.force = newGravity;
+                
+                gravity.SetNewGravity(cameraDirection, true, freeFallDrag);
+                //^^^^^ all of this happens in this function
+                //gravitationalDirection = cameraDirection;
+                //Vector3 newGravity = cameraDirection.normalized * gravityForce;
+                //myGravity.force = newGravity;
+                //rb.freezeRotation = true;
+                //rb.drag = freeFallDrag;
                 
                 //unlock player
                 immobile = false;
                 zerograv = false;
                 shiftDiving = true;
-                rb.freezeRotation = true;
-                rb.drag = freeFallDrag;
+
                 playerAni.SetBool("Zero Grav", false);
             }
         }
     }
-    public void AerialRotate(InputAction.CallbackContext context)
+    public void EnableField(InputAction.CallbackContext context)
     {
-        rotateInput = context.ReadValue<float>();
+        if (context.started)
+        {
+            fieldEnabled = !fieldEnabled;
+            if (fieldEnabled)
+            {
+                gravityField.gameObject.SetActive(fieldEnabled);
+            }
+            else
+            {
+                foreach(InteractableObject obj in gravityField.objectsInOrbit)
+                {
+                    obj.ToggleOrbit(false, null);
+                }
+                gravityField.objectsInOrbit.Clear();
+                for (int i = 0; i < gravityField.slotAvailability.Count; i++)
+                {
+                    gravityField.slotAvailability[i] = true;
+                }
+                gravityField.gameObject.SetActive(false);
+            }
+        }
     }
+    
+    //correct these both tomorrow
+    public void AimObject(InputAction.CallbackContext context)
+    {
+        if (context.started)
+        {
+            if (fieldEnabled && gravityField.objectsInOrbit.Count > 0)
+            {
+                aimedDownSights = true;
+            }
+        }
+        else if (context.canceled)
+        {
+            aimedDownSights = false;
+        }
+    }
+
+    public void ShootObject(InputAction.CallbackContext context)
+    {
+        if (context.started)
+        {
+            if (aimedDownSights)
+            {
+                foreach (InteractableObject obj in gravityField.objectsInOrbit)
+                {
+                    obj.gravity.SetNewGravity(myCamera.transform.forward,false, 0f);//= myCamera.transform.forward * obj.gravityForceUnit;
+                }
+            }
+        }
+    }
+
     #endregion
 }

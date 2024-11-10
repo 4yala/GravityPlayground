@@ -906,6 +906,54 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: f0469eb4-7404-4d5a-8e36-035f737bc255
     m_ActionName: Player/CameraMove[/Mouse/delta]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: -2724383346561695525}
+        m_TargetAssemblyTypeName: PlayerControllerDebug, Assembly-CSharp
+        m_MethodName: EnableField
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: afee4515-bf58-41bf-80cd-d732c9b4b008
+    m_ActionName: Player/Gravity Field[/Keyboard/ctrl]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: -2724383346561695525}
+        m_TargetAssemblyTypeName: PlayerControllerDebug, Assembly-CSharp
+        m_MethodName: AimObject
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 0fb77d20-c7e3-42a8-a2d1-3b923aa60cf0
+    m_ActionName: Player/Aim[/Mouse/rightButton]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: -2724383346561695525}
+        m_TargetAssemblyTypeName: PlayerControllerDebug, Assembly-CSharp
+        m_MethodName: ShootObject
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 9df21507-af3a-455d-b8a7-54395c7d154d
+    m_ActionName: Player/Shoot[/Mouse/leftButton]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -959,6 +1007,7 @@ MonoBehaviour:
   rb: {fileID: 8816082189579956960}
   playerAni: {fileID: 5893414150438550563}
   myGravity: {fileID: 4776158035026096381}
+  gravityField: {fileID: 0}
   myCamera: {fileID: 0}
   myCameraOrientation: {fileID: 0}
   myCameraCm: {fileID: 0}
@@ -967,7 +1016,7 @@ MonoBehaviour:
   maxSpeedWalk: 10
   deceleration: 20
   rotationSpeed: 1000
-  jumpForce: 3
+  jumpForce: 4
   groundedDrag: 2.5
   zeroGravDrag: 3
   freeFallDrag: 3
@@ -976,10 +1025,12 @@ MonoBehaviour:
   maxDiveSpeed: 50
   diveAcceleration: 1
   diveRotationSpeed: 50
+  diveCameraRotationSpeed: 1000
   moveInput: {x: 0, y: 0}
   gravitationalDirection: {x: 0, y: 0, z: 0}
   rotateInput: 0
   diveLength: 15
+  requireRecentre: 0
   zerograv: 0
   shifted: 0
   immobile: 0
@@ -987,6 +1038,8 @@ MonoBehaviour:
   diving: 0
   shiftDiving: 0
   cameraTransitioned: 0
+  fieldEnabled: 0
+  aimedDownSights: 0
   animationBools:
   - Movement
   - Zero Grav
