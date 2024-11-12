@@ -2859,6 +2859,7 @@ GameObject:
   - component: {fileID: 603375423}
   - component: {fileID: 603375422}
   - component: {fileID: 603375429}
+  - component: {fileID: 603375430}
   m_Layer: 0
   m_Name: Sphere (1)
   m_TagString: Untagged
@@ -2885,7 +2886,7 @@ MonoBehaviour:
   myAttractor: {fileID: 0}
   gravity: {fileID: 0}
   launched: 0
-  myJoint: {fileID: 0}
+  myJoint: {fileID: 603375430}
 --- !u!75 &603375423
 ConstantForce:
   m_ObjectHideFlags: 0
@@ -3027,6 +3028,30 @@ MonoBehaviour:
   gravitationalDirection: {x: 0, y: 0, z: 0}
   gravityForceUnit: 9.81
   rb: {fileID: 0}
+--- !u!145 &603375430
+SpringJoint:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 603375421}
+  m_ConnectedBody: {fileID: 0}
+  m_ConnectedArticulationBody: {fileID: 0}
+  m_Anchor: {x: 0, y: 0.5, z: 0}
+  m_AutoConfigureConnectedAnchor: 1
+  m_ConnectedAnchor: {x: 0, y: 0, z: 0}
+  serializedVersion: 2
+  m_Spring: 10
+  m_Damper: 0.2
+  m_MinDistance: 0
+  m_MaxDistance: 0
+  m_Tolerance: 0.025
+  m_BreakForce: Infinity
+  m_BreakTorque: Infinity
+  m_EnableCollision: 0
+  m_EnablePreprocessing: 1
+  m_MassScale: 1
+  m_ConnectedMassScale: 1
 --- !u!1 &639518425
 GameObject:
   m_ObjectHideFlags: 0
@@ -3380,6 +3405,7 @@ GameObject:
   - component: {fileID: 705881039}
   - component: {fileID: 705881038}
   - component: {fileID: 705881037}
+  - component: {fileID: 705881045}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -3542,12 +3568,36 @@ Transform:
   m_GameObject: {fileID: 705881036}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.093, y: 2.4, z: 39.1}
+  m_LocalPosition: {x: -5.468, y: 2.4, z: 39.1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!145 &705881045
+SpringJoint:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 705881036}
+  m_ConnectedBody: {fileID: 0}
+  m_ConnectedArticulationBody: {fileID: 0}
+  m_Anchor: {x: 0, y: 0, z: 0}
+  m_AutoConfigureConnectedAnchor: 1
+  m_ConnectedAnchor: {x: 0, y: 0, z: 0}
+  serializedVersion: 2
+  m_Spring: 10
+  m_Damper: 0.2
+  m_MinDistance: 0
+  m_MaxDistance: 0
+  m_Tolerance: 0.025
+  m_BreakForce: Infinity
+  m_BreakTorque: Infinity
+  m_EnableCollision: 0
+  m_EnablePreprocessing: 1
+  m_MassScale: 1
+  m_ConnectedMassScale: 1
 --- !u!1 &780762544
 GameObject:
   m_ObjectHideFlags: 0
@@ -4215,30 +4265,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 3602038728177925527, guid: 462cc8af65259594584ee91f3318518f, type: 3}
   m_PrefabInstance: {fileID: 4151517954330068857}
   m_PrefabAsset: {fileID: 0}
---- !u!145 &989104146
-SpringJoint:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 989104144}
-  m_ConnectedBody: {fileID: 0}
-  m_ConnectedArticulationBody: {fileID: 0}
-  m_Anchor: {x: 0, y: 0, z: 0}
-  m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: 0, y: 0, z: 0}
-  serializedVersion: 2
-  m_Spring: 5
-  m_Damper: 0.2
-  m_MinDistance: 0
-  m_MaxDistance: 1
-  m_Tolerance: 0.025
-  m_BreakForce: Infinity
-  m_BreakTorque: Infinity
-  m_EnableCollision: 0
-  m_EnablePreprocessing: 1
-  m_MassScale: 1
-  m_ConnectedMassScale: 1
 --- !u!54 &989104147
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -4761,30 +4787,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 3339267775594785824, guid: 462cc8af65259594584ee91f3318518f, type: 3}
   m_PrefabInstance: {fileID: 4151517954330068857}
   m_PrefabAsset: {fileID: 0}
---- !u!145 &1286211017
-SpringJoint:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1286211015}
-  m_ConnectedBody: {fileID: 0}
-  m_ConnectedArticulationBody: {fileID: 0}
-  m_Anchor: {x: 0, y: 0, z: 0}
-  m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: 0, y: 2.4, z: 39.1}
-  serializedVersion: 2
-  m_Spring: 1
-  m_Damper: 0.2
-  m_MinDistance: 0
-  m_MaxDistance: 1
-  m_Tolerance: 0.025
-  m_BreakForce: Infinity
-  m_BreakTorque: Infinity
-  m_EnableCollision: 0
-  m_EnablePreprocessing: 1
-  m_MassScale: 1
-  m_ConnectedMassScale: 1
 --- !u!54 &1286211018
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -6205,30 +6207,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 6911220493747356787, guid: 462cc8af65259594584ee91f3318518f, type: 3}
   m_PrefabInstance: {fileID: 4151517954330068857}
   m_PrefabAsset: {fileID: 0}
---- !u!145 &1943895749
-SpringJoint:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1943895747}
-  m_ConnectedBody: {fileID: 0}
-  m_ConnectedArticulationBody: {fileID: 0}
-  m_Anchor: {x: 0, y: 0, z: 0}
-  m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: 1.5, y: 2.4, z: 40}
-  serializedVersion: 2
-  m_Spring: 5
-  m_Damper: 0.2
-  m_MinDistance: 0
-  m_MaxDistance: 1
-  m_Tolerance: 0.025
-  m_BreakForce: Infinity
-  m_BreakTorque: Infinity
-  m_EnableCollision: 0
-  m_EnablePreprocessing: 1
-  m_MassScale: 1
-  m_ConnectedMassScale: 1
 --- !u!54 &1943895750
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -7164,21 +7142,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3339267775594785824, guid: 462cc8af65259594584ee91f3318518f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1286211018}
-    - targetCorrespondingSourceObject: {fileID: 3339267775594785824, guid: 462cc8af65259594584ee91f3318518f, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1286211017}
     - targetCorrespondingSourceObject: {fileID: 3602038728177925527, guid: 462cc8af65259594584ee91f3318518f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 989104147}
-    - targetCorrespondingSourceObject: {fileID: 3602038728177925527, guid: 462cc8af65259594584ee91f3318518f, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 989104146}
     - targetCorrespondingSourceObject: {fileID: 6911220493747356787, guid: 462cc8af65259594584ee91f3318518f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1943895750}
-    - targetCorrespondingSourceObject: {fileID: 6911220493747356787, guid: 462cc8af65259594584ee91f3318518f, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1943895749}
   m_SourcePrefab: {fileID: 100100000, guid: 462cc8af65259594584ee91f3318518f, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
