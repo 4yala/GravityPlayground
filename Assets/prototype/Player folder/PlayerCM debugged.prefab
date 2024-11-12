@@ -720,6 +720,7 @@ GameObject:
   - component: {fileID: 5893414150438550563}
   - component: {fileID: 4776158035026096381}
   - component: {fileID: -2724383346561695525}
+  - component: {fileID: 6982570214920854822}
   m_Layer: 8
   m_Name: PlayerCM debugged
   m_TagString: Player
@@ -954,6 +955,10 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 9df21507-af3a-455d-b8a7-54395c7d154d
     m_ActionName: Player/Shoot[/Mouse/leftButton]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 324641e6-4bb0-45dc-b809-dba089f76abc
+    m_ActionName: Player/Scroll[/Mouse/scroll]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -1006,12 +1011,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rb: {fileID: 8816082189579956960}
   playerAni: {fileID: 5893414150438550563}
-  myGravity: {fileID: 4776158035026096381}
+  gravity: {fileID: 0}
   gravityField: {fileID: 0}
+  myInputs:
+    m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 
+    m_ActionName: 
   myCamera: {fileID: 0}
   myCameraOrientation: {fileID: 0}
   myCameraCm: {fileID: 0}
-  gravityForce: 9.81
   moveSpeed: 20
   maxSpeedWalk: 10
   deceleration: 20
@@ -1027,7 +1036,6 @@ MonoBehaviour:
   diveRotationSpeed: 50
   diveCameraRotationSpeed: 1000
   moveInput: {x: 0, y: 0}
-  gravitationalDirection: {x: 0, y: 0, z: 0}
   rotateInput: 0
   diveLength: 15
   requireRecentre: 0
@@ -1045,6 +1053,22 @@ MonoBehaviour:
   - Zero Grav
   - Grounded
   - Diving
+--- !u!114 &6982570214920854822
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5533189622618693888}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dab5f37e14be85040811fc32a2eb3515, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  myGravitationalForce: {fileID: 0}
+  gravitationalDirection: {x: 0, y: 0, z: 0}
+  gravityForceUnit: 9.81
+  rb: {fileID: 0}
 --- !u!1 &5874129796454649584
 GameObject:
   m_ObjectHideFlags: 0

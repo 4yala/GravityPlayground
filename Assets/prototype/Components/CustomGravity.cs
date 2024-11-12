@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(CustomGravity))]
+[RequireComponent(typeof(ConstantForce))]
 [RequireComponent(typeof(Rigidbody))]
 
 public class CustomGravity : MonoBehaviour
@@ -21,16 +21,19 @@ public class CustomGravity : MonoBehaviour
         //connect components
         myGravitationalForce = GetComponent<ConstantForce>();
         rb = GetComponent<Rigidbody>();
+        rb.useGravity = false;
         //initialise with gravity pulling down
         myGravitationalForce.force = Vector3.down * gravityForceUnit;
         gravitationalDirection = Vector3.down;
     }
 
     #region Set Events
+    //set direction for reference
     public void SoftSetGravity(Vector3 direction)
     {
         gravitationalDirection = direction.normalized;
     }
+    //set direction with gravity
     public void SetNewGravity(Vector3 direction, bool noRotation, float drag)
     {
         gravitationalDirection = direction.normalized;
@@ -38,6 +41,7 @@ public class CustomGravity : MonoBehaviour
         rb.freezeRotation = noRotation;
         rb.drag = drag;
     }
+    //start zero gravity behaviour
     public void SetZeroGravity(float zeroGravDrag)
     {
         myGravitationalForce.force = Vector3.zero;
@@ -45,6 +49,7 @@ public class CustomGravity : MonoBehaviour
         rb.freezeRotation = false;
         rb.drag = zeroGravDrag;
     }
+    //reset gravity to normal
     public void RevertGravity(bool noRotation, float drag)
     {
         gravitationalDirection = Vector3.down;

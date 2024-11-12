@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 
 [RequireComponent(typeof(CustomGravity))]
+[RequireComponent(typeof(SpringJoint))]
 public class InteractableObject : MonoBehaviour
 {
     #region Variables
@@ -16,6 +17,7 @@ public class InteractableObject : MonoBehaviour
     [SerializeField] public GravityField myAttractor;
     [SerializeField] public CustomGravity gravity;
     [SerializeField] public bool launched;
+    [SerializeField]  SpringJoint myJoint;
     
     #endregion
 
@@ -25,23 +27,19 @@ public class InteractableObject : MonoBehaviour
         gameObject.tag = "Interactable";
         gravity = GetComponent<CustomGravity>();
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    
 
     void FixedUpdate()
     {
         if (orbiting && holdsterTarget != null && launchPoint == null)
         {
             //fix later
-            gameObject.transform.position = Vector3.Lerp(gameObject.transform.position, holdsterTarget.position, Time.fixedDeltaTime);
+            //gameObject.transform.position = Vector3.Lerp(gameObject.transform.position, holdsterTarget.position, Time.fixedDeltaTime);
         }
         else if (orbiting && holdsterTarget != null && launchPoint != null)
         {
             gameObject.transform.position = Vector3.Lerp(gameObject.transform.position, launchPoint.position, Time.fixedDeltaTime);
+            Debug.Log("readying");
         }
     }
 
@@ -53,12 +51,17 @@ public class InteractableObject : MonoBehaviour
         {
             orbiting = true;
             holdsterTarget = incomingTarget;
-            gravity.SetZeroGravity(3f);
+            myJoint.connectedBody = holdsterTarget.GetComponent<Rigidbody>();
+            //incomingTarget.GetComponent<SpringJoint>().connectedBody = gravity.rb;
+            //Debug.Log();
+            gravity.SetZeroGravity(0f);
         }
         else
         {
             //myAttractor.RemoveItem(gameObject.GetComponent<InteractableObject>());
             orbiting = false;
+            //incomingTarget.GetComponent<SpringJoint>().connectedBody = null;
+            myJoint.connectedBody = null;
             holdsterTarget = null;
             gravity.RevertGravity(false,0f);
         }
@@ -68,10 +71,19 @@ public class InteractableObject : MonoBehaviour
         if (enable)
         {
             launchPoint = pointToGo;
+            holdsterTarget.GetComponent<SpringJoint>().connectedBody = null;
+            myJoint.connectedBody = null;
         }
         else
         {
             launchPoint = null;
+            //holdsterTarget.GetComponent<SpringJoint>().connectedBody = gravity.rb;
+            if (holdsterTarget)
+            {
+                myJoint.connectedBody = holdsterTarget.GetComponent<Rigidbody>();
+            }
+            Debug.Log("missing function");
+            //lerp position back to a designated place
         }
     }
     #endregion

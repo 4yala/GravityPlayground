@@ -18,18 +18,11 @@ public class GravityField : MonoBehaviour
     [SerializeField] public List<InteractableObject> objectsInOrbit;
     [SerializeField] public List<InteractableObject> objectsOutOfOrbit;
     
+    //does it need just the player?
+    [SerializeField] public PlayerControllerDebug owner;
+    
     
     #endregion
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-    }
 
     #region Inventory changes
     void OnTriggerEnter(Collider other)
@@ -122,6 +115,7 @@ public class GravityField : MonoBehaviour
             {
                 objectToShoot = objectsInOrbit[0];
                 objectToShoot.ReadyObject(true, shootPoint);
+                owner.aimedDownSights = true;
             }
         }
         else
@@ -134,6 +128,7 @@ public class GravityField : MonoBehaviour
             }
             objectToShoot.ReadyObject(false, null);
             objectToShoot = null;
+            owner.aimedDownSights = false;
         }
     }
     public void ScrollOrbit(float inputValue)
@@ -171,6 +166,7 @@ public class GravityField : MonoBehaviour
                 newObjectID = currentObjectID - 1;
             }
         }
+        //reset object
         objectToShoot.ReadyObject(false,null);
         objectToShoot = objectsInOrbit[newObjectID];
         objectToShoot.ReadyObject(true,shootPoint);
@@ -194,11 +190,10 @@ public class GravityField : MonoBehaviour
             {
                 ScrollOrbit(1);
             }
+            // there is none, deselect aim
             else
             {
                 TriggerAim(false);
-                //call player to stop aiming
-                Debug.Log("missing function");
             }
 
         }

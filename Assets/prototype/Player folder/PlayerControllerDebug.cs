@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
 [RequireComponent(typeof(CustomGravity))]
 public class PlayerControllerDebug : MonoBehaviour
@@ -52,7 +53,7 @@ public class PlayerControllerDebug : MonoBehaviour
     [SerializeField] bool shiftDiving; //to be used only when toggling out from zero gravity, in order to smooth landing.
     [SerializeField] bool cameraTransitioned;
     [SerializeField] bool fieldEnabled;
-    [SerializeField] bool aimedDownSights;
+    [SerializeField] public bool aimedDownSights;
     [SerializeField] List<string> animationBools;
     #endregion
 
@@ -65,6 +66,8 @@ public class PlayerControllerDebug : MonoBehaviour
         myCameraCm.LookAt = transform;
         myCameraCm.Follow = transform;
         gravityField.gameObject.SetActive(fieldEnabled);
+        gravityField.owner = gameObject.GetComponent<PlayerControllerDebug>();
+
     }
 
     // Update is called once per frame
@@ -503,16 +506,16 @@ public class PlayerControllerDebug : MonoBehaviour
         //check that there are objects to shoot with
         if (context.started && fieldEnabled && gravityField.objectsInOrbit.Count > 0)
         {
-            aimedDownSights = true;
-            gravityField.TriggerAim(aimedDownSights);
+            //aimedDownSights = true;
+            gravityField.TriggerAim(true);
         }
         
         //cancel when let go of input
         //only cancel if it has been aimed to avoid breakage
         else if (context.canceled && aimedDownSights)
         {
-            aimedDownSights = false;
-            gravityField.TriggerAim(aimedDownSights);
+            //aimedDownSights = false;
+            gravityField.TriggerAim(false);
         }
     }
     public void ScrollObjects(InputAction.CallbackContext context)
