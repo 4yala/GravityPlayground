@@ -27,7 +27,6 @@ public class CustomGravity : MonoBehaviour
     }
 
     #region Set Events
-
     public void SoftSetGravity(Vector3 direction)
     {
         gravitationalDirection = direction.normalized;
@@ -39,7 +38,6 @@ public class CustomGravity : MonoBehaviour
         rb.freezeRotation = noRotation;
         rb.drag = drag;
     }
-    
     public void SetZeroGravity(float zeroGravDrag)
     {
         myGravitationalForce.force = Vector3.zero;
@@ -47,7 +45,6 @@ public class CustomGravity : MonoBehaviour
         rb.freezeRotation = false;
         rb.drag = zeroGravDrag;
     }
-
     public void RevertGravity(bool noRotation, float drag)
     {
         gravitationalDirection = Vector3.down;
@@ -55,7 +52,6 @@ public class CustomGravity : MonoBehaviour
         rb.freezeRotation = noRotation;
         rb.drag = drag;
     }
-    
     #endregion
 
 }

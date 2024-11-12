@@ -12,13 +12,7 @@ public class PlayerControllerDebug : MonoBehaviour
     [SerializeField] Rigidbody rb;
     [SerializeField] Animator playerAni;
     [SerializeField] CustomGravity gravity;
-    
-    //abandon
-    //[SerializeField] ConstantForce myGravity; 
-    //
-    
     [SerializeField] GravityField gravityField;
-
     
     [Header(("Camera components"))]
     [SerializeField] Camera myCamera;
@@ -26,7 +20,6 @@ public class PlayerControllerDebug : MonoBehaviour
     [SerializeField] CinemachineFreeLook myCameraCm;
 
     [Header("Grounded Movement Variables")]
-    //[SerializeField] float gravityForce;
     [SerializeField] float moveSpeed;
     [SerializeField] float maxSpeedWalk;
     [SerializeField] float deceleration;
@@ -46,9 +39,6 @@ public class PlayerControllerDebug : MonoBehaviour
     
     [Header("Debug elements to inspect")]
     [SerializeField] Vector2 moveInput;
-    //remove?
-    //[SerializeField] Vector3 gravitationalDirection;
-    //remove
     [SerializeField] float rotateInput;
     [SerializeField] float diveLength;
     [SerializeField] bool requireRecentre;
@@ -72,7 +62,6 @@ public class PlayerControllerDebug : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         gravity = GetComponent<CustomGravity>();
-        //gravitationalDirection = Vector3.down;
         myCameraCm.LookAt = transform;
         myCameraCm.Follow = transform;
         gravityField.gameObject.SetActive(fieldEnabled);
@@ -212,6 +201,8 @@ public class PlayerControllerDebug : MonoBehaviour
             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 50f * Time.fixedDeltaTime);
             
         }
+        
+        //gravity field  updates, fix later or implement in other script
         else if (zerograv)
         {
             gravityField.transform.up = myCamera.transform.up;
@@ -272,6 +263,7 @@ public class PlayerControllerDebug : MonoBehaviour
         
         yield return null;
     }
+    
     //slerp the camera to its new orientation smoothly
     IEnumerator OrientateCamera(float duration, Vector3 desiredOrientation, bool requireCentering)
     {
@@ -360,11 +352,6 @@ public class PlayerControllerDebug : MonoBehaviour
             diving = false;
         }
     }
-    //orientate field
-    void OrientateField()
-    {
-        
-    }
     
     //check corresponding animation states
     void AnimationStates()
@@ -389,6 +376,7 @@ public class PlayerControllerDebug : MonoBehaviour
     
     //All events called by the input system
     #region Input events
+    //General movement
     public void OnMove(InputAction.CallbackContext context)
     {
         moveInput = context.ReadValue<Vector2>();
@@ -410,6 +398,8 @@ public class PlayerControllerDebug : MonoBehaviour
     {
         rotateInput = context.ReadValue<float>();
     }
+    
+    //Gravity functions
     public void RevertGravity(InputAction.CallbackContext context)
     {
         //do only once
@@ -489,60 +479,66 @@ public class PlayerControllerDebug : MonoBehaviour
             }
         }
     }
+    
+    //Object interaction functions
     public void EnableField(InputAction.CallbackContext context)
     {
+        //do only once
         if (context.started)
         {
+            //two-way switch behaviour
             fieldEnabled = !fieldEnabled;
-            if (fieldEnabled)
+            //if the switch is off, disable the field
+            if (!fieldEnabled)
             {
-                gravityField.gameObject.SetActive(fieldEnabled);
+                gravityField.DisableField();
             }
-            else
-            {
-                foreach(InteractableObject obj in gravityField.objectsInOrbit)
-                {
-                    obj.ToggleOrbit(false, null);
-                }
-                gravityField.objectsInOrbit.Clear();
-                for (int i = 0; i < gravityField.slotAvailability.Count; i++)
-                {
-                    gravityField.slotAvailability[i] = true;
-                }
-                gravityField.gameObject.SetActive(false);
-            }
+            //enable and disable accordingly
+            gravityField.gameObject.SetActive(fieldEnabled);
         }
     }
-    
-    //correct these both tomorrow
     public void AimObject(InputAction.CallbackContext context)
     {
-        if (context.started)
+        //start aiming when initialised 
+        //check that there are objects to shoot with
+        if (context.started && fieldEnabled && gravityField.objectsInOrbit.Count > 0)
         {
-            if (fieldEnabled && gravityField.objectsInOrbit.Count > 0)
-            {
-                aimedDownSights = true;
-            }
+            aimedDownSights = true;
+            gravityField.TriggerAim(aimedDownSights);
         }
-        else if (context.canceled)
+        
+        //cancel when let go of input
+        //only cancel if it has been aimed to avoid breakage
+        else if (context.canceled && aimedDownSights)
         {
             aimedDownSights = false;
+            gravityField.TriggerAim(aimedDownSights);
         }
     }
-
+    public void ScrollObjects(InputAction.CallbackContext context)
+    {
+        //for some reason delta scroll is read as a vector 2, given that only the y-axis is used a float is preferred
+        float inputScroll = context.ReadValue<Vector2>().y;
+        if (context.started)
+        {
+            //only scroll through objects if they are aimed
+            if (aimedDownSights)
+            {
+                gravityField.ScrollOrbit(inputScroll);
+            }
+        }
+    }
     public void ShootObject(InputAction.CallbackContext context)
     {
+        //do once 
         if (context.started)
         {
             if (aimedDownSights)
             {
-                foreach (InteractableObject obj in gravityField.objectsInOrbit)
-                {
-                    obj.gravity.SetNewGravity(myCamera.transform.forward,false, 0f);//= myCamera.transform.forward * obj.gravityForceUnit;
-                }
+                //simply change gravity in similar fashion to the player
+                gravityField.ShootObject(myCamera.transform.forward);
             }
         }
     }
-
     #endregion
 }
