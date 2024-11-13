@@ -21,7 +21,6 @@ public class GravityField : MonoBehaviour
     //does it need just the player?
     [SerializeField] public PlayerControllerDebug owner;
     
-    
     #endregion
 
     #region Inventory changes
@@ -46,7 +45,6 @@ public class GravityField : MonoBehaviour
                 int incomingId = objectsInOrbit.IndexOf(other.gameObject.GetComponent<InteractableObject>());
                 
                 //set up item with dependencies
-                objectsInOrbit[incomingId].myAttractor = gameObject.GetComponent<GravityField>();
                 for (int i = 0; i < slotAvailability.Count; i++)
                 {
                     //find an available index to lock the object to
@@ -64,13 +62,12 @@ public class GravityField : MonoBehaviour
     }
     
     //for single clearing access
-    public void RemoveItem(InteractableObject item)
+    public void RemoveItem(InteractableObject item, bool shooting = false)
     {
         //clear item and self from communications
         int leavingID = targetLocks.IndexOf(item.holdsterTarget);
         slotAvailability[leavingID] = true;
-        item.holdsterTarget = null;
-        item.myAttractor = null;
+        item.ToggleOrbit(false,null, shooting);
         objectsInOrbit.Remove(item);
     }
     
@@ -86,9 +83,7 @@ public class GravityField : MonoBehaviour
         //clear all items and dependencies
         foreach (InteractableObject item in objectsInOrbit)
         {
-            item.myAttractor = null;
-            item.holdsterTarget = null;
-            item.gravity.RevertGravity(false,0f);
+            item.ToggleOrbit(false,null);
         }
         foreach (InteractableObject item in objectsOutOfOrbit)
         {
@@ -178,7 +173,7 @@ public class GravityField : MonoBehaviour
         {
             //change lists
             objectsOutOfOrbit.Add(objectToShoot);
-            RemoveItem(objectToShoot);
+            RemoveItem(objectToShoot, true);
             
             //launch in direction
             objectToShoot.launched = true;

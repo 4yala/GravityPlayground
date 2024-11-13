@@ -2859,7 +2859,6 @@ GameObject:
   - component: {fileID: 603375423}
   - component: {fileID: 603375422}
   - component: {fileID: 603375429}
-  - component: {fileID: 603375430}
   m_Layer: 0
   m_Name: Sphere (1)
   m_TagString: Untagged
@@ -2886,7 +2885,10 @@ MonoBehaviour:
   myAttractor: {fileID: 0}
   gravity: {fileID: 0}
   launched: 0
-  myJoint: {fileID: 603375430}
+  myJoint: {fileID: 0}
+  min: 1
+  max: 2
+  breakForce: 50
 --- !u!75 &603375423
 ConstantForce:
   m_ObjectHideFlags: 0
@@ -3028,30 +3030,6 @@ MonoBehaviour:
   gravitationalDirection: {x: 0, y: 0, z: 0}
   gravityForceUnit: 9.81
   rb: {fileID: 0}
---- !u!145 &603375430
-SpringJoint:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 603375421}
-  m_ConnectedBody: {fileID: 0}
-  m_ConnectedArticulationBody: {fileID: 0}
-  m_Anchor: {x: 0, y: 0.5, z: 0}
-  m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: 0, y: 0, z: 0}
-  serializedVersion: 2
-  m_Spring: 10
-  m_Damper: 0.2
-  m_MinDistance: 0
-  m_MaxDistance: 0
-  m_Tolerance: 0.025
-  m_BreakForce: Infinity
-  m_BreakTorque: Infinity
-  m_EnableCollision: 0
-  m_EnablePreprocessing: 1
-  m_MassScale: 1
-  m_ConnectedMassScale: 1
 --- !u!1 &639518425
 GameObject:
   m_ObjectHideFlags: 0
@@ -3433,6 +3411,9 @@ MonoBehaviour:
   gravity: {fileID: 0}
   launched: 0
   myJoint: {fileID: 0}
+  min: 0
+  max: 0
+  breakForce: 0
 --- !u!114 &705881038
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3567,12 +3548,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 705881036}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5.468, y: 2.4, z: 39.1}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -2.3226666, y: 0, z: -0.30000052}
+  m_LocalScale: {x: 0.33333334, y: 0.33333334, z: 0.33333334}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1943895751}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!145 &705881045
 SpringJoint:
@@ -3614,7 +3595,6 @@ GameObject:
   - component: {fileID: 780762550}
   - component: {fileID: 780762552}
   - component: {fileID: 780762553}
-  - component: {fileID: 780762554}
   m_Layer: 0
   m_Name: Sphere
   m_TagString: Untagged
@@ -3766,7 +3746,10 @@ MonoBehaviour:
   myAttractor: {fileID: 0}
   gravity: {fileID: 0}
   launched: 0
-  myJoint: {fileID: 780762554}
+  myJoint: {fileID: 0}
+  min: 1
+  max: 2
+  breakForce: 50
 --- !u!114 &780762553
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3783,30 +3766,6 @@ MonoBehaviour:
   gravitationalDirection: {x: 0, y: 0, z: 0}
   gravityForceUnit: 9.81
   rb: {fileID: 0}
---- !u!145 &780762554
-SpringJoint:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 780762544}
-  m_ConnectedBody: {fileID: 0}
-  m_ConnectedArticulationBody: {fileID: 0}
-  m_Anchor: {x: 0, y: 0.5, z: 0}
-  m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: 0, y: 0, z: 0}
-  serializedVersion: 2
-  m_Spring: 10
-  m_Damper: 0.2
-  m_MinDistance: 0
-  m_MaxDistance: 0
-  m_Tolerance: 0.025
-  m_BreakForce: Infinity
-  m_BreakTorque: Infinity
-  m_EnableCollision: 0
-  m_EnablePreprocessing: 1
-  m_MassScale: 1
-  m_ConnectedMassScale: 1
 --- !u!1 &797988317
 GameObject:
   m_ObjectHideFlags: 0
@@ -4290,7 +4249,7 @@ Rigidbody:
   m_UseGravity: 0
   m_IsKinematic: 1
   m_Interpolate: 0
-  m_Constraints: 14
+  m_Constraints: 126
   m_CollisionDetection: 0
 --- !u!1 &1011410004
 GameObject:
@@ -4812,7 +4771,7 @@ Rigidbody:
   m_UseGravity: 0
   m_IsKinematic: 1
   m_Interpolate: 0
-  m_Constraints: 14
+  m_Constraints: 126
   m_CollisionDetection: 0
 --- !u!1001 &1306834940
 PrefabInstance:
@@ -6096,6 +6055,38 @@ MonoBehaviour:
   m_Damping: 0
   m_DampingWhenOccluded: 0
   m_OptimalTargetDistance: 0
+--- !u!1 &1940423602 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2716094117436463788, guid: 462cc8af65259594584ee91f3318518f, type: 3}
+  m_PrefabInstance: {fileID: 4151517954330068857}
+  m_PrefabAsset: {fileID: 0}
+--- !u!54 &1940423604
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1940423602}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 126
+  m_CollisionDetection: 0
 --- !u!1 &1942620003
 GameObject:
   m_ObjectHideFlags: 0
@@ -6232,8 +6223,13 @@ Rigidbody:
   m_UseGravity: 0
   m_IsKinematic: 1
   m_Interpolate: 0
-  m_Constraints: 14
+  m_Constraints: 126
   m_CollisionDetection: 0
+--- !u!4 &1943895751 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2145496433477248687, guid: 462cc8af65259594584ee91f3318518f, type: 3}
+  m_PrefabInstance: {fileID: 4151517954330068857}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1946229672
 GameObject:
   m_ObjectHideFlags: 0
@@ -7137,8 +7133,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 2145496433477248687, guid: 462cc8af65259594584ee91f3318518f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 705881044}
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2716094117436463788, guid: 462cc8af65259594584ee91f3318518f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1940423604}
     - targetCorrespondingSourceObject: {fileID: 3339267775594785824, guid: 462cc8af65259594584ee91f3318518f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1286211018}
@@ -7166,4 +7168,3 @@ SceneRoots:
   - {fileID: 2132253922}
   - {fileID: 498793032}
   - {fileID: 4151517954330068857}
-  - {fileID: 705881044}

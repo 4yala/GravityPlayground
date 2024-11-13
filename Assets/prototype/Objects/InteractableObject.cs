@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 
 [RequireComponent(typeof(CustomGravity))]
-[RequireComponent(typeof(SpringJoint))]
+//[RequireComponent(typeof(SpringJoint))]
 public class InteractableObject : MonoBehaviour
 {
     #region Variables
@@ -17,7 +17,10 @@ public class InteractableObject : MonoBehaviour
     [SerializeField] public GravityField myAttractor;
     [SerializeField] public CustomGravity gravity;
     [SerializeField] public bool launched;
-    [SerializeField]  SpringJoint myJoint;
+
+    [Header("Attraction settings")] 
+    [SerializeField] HingeJoint myJoint;
+    [SerializeField] float min, max, breakForce;
     
     #endregion
 
@@ -38,32 +41,41 @@ public class InteractableObject : MonoBehaviour
         }
         else if (orbiting && holdsterTarget != null && launchPoint != null)
         {
-            gameObject.transform.position = Vector3.Lerp(gameObject.transform.position, launchPoint.position, Time.fixedDeltaTime);
-            Debug.Log("readying");
+            //gameObject.transform.position = Vector3.Lerp(gameObject.transform.position, launchPoint.position, Time.fixedDeltaTime);
+            //Debug.Log("readying");
         }
     }
 
     #region InteractionEvents
 
-    public void ToggleOrbit(bool enable , Transform incomingTarget)
+    public void ToggleOrbit(bool enable , Transform incomingTarget = null, bool retainGravity = false, GravityField attractor = null)
     {
         if (enable)
         {
+            myAttractor = attractor;
             orbiting = true;
             holdsterTarget = incomingTarget;
-            myJoint.connectedBody = holdsterTarget.GetComponent<Rigidbody>();
-            //incomingTarget.GetComponent<SpringJoint>().connectedBody = gravity.rb;
-            //Debug.Log();
+            ProfileAttraction(holdsterTarget.GetComponent<Rigidbody>());
             gravity.SetZeroGravity(0f);
         }
         else
         {
-            //myAttractor.RemoveItem(gameObject.GetComponent<InteractableObject>());
+            myAttractor = attractor;
+            Debug.Log("breaking connection" + gameObject.name);
             orbiting = false;
-            //incomingTarget.GetComponent<SpringJoint>().connectedBody = null;
-            myJoint.connectedBody = null;
-            holdsterTarget = null;
-            gravity.RevertGravity(false,0f);
+            holdsterTarget = incomingTarget;
+            if (myJoint)
+            {
+                myJoint.breakForce = 0f;
+                Destroy(myJoint);
+                myJoint = null;
+            }
+            
+            if (!retainGravity)
+            {
+                gravity.RevertGravity(false,0f);
+            }
+            
         }
     }
     public void ReadyObject(bool enable, Transform pointToGo)
@@ -71,20 +83,36 @@ public class InteractableObject : MonoBehaviour
         if (enable)
         {
             launchPoint = pointToGo;
-            holdsterTarget.GetComponent<SpringJoint>().connectedBody = null;
-            myJoint.connectedBody = null;
+            myJoint.connectedBody = launchPoint.GetComponent<Rigidbody>();
         }
         else
         {
             launchPoint = null;
-            //holdsterTarget.GetComponent<SpringJoint>().connectedBody = gravity.rb;
             if (holdsterTarget)
             {
                 myJoint.connectedBody = holdsterTarget.GetComponent<Rigidbody>();
             }
             Debug.Log("missing function");
             //lerp position back to a designated place
+            
         }
     }
+    void ProfileAttraction(Rigidbody attractionPoint)
+    {
+        
+        myJoint = gameObject.AddComponent<HingeJoint>();
+        myJoint.connectedBody = attractionPoint;
+        myJoint.autoConfigureConnectedAnchor = false;
+        myJoint.anchor = Vector3.zero;
+        //myJoint.minDistance = min;
+        //myJoint.maxDistance = max;
+        myJoint.breakForce = breakForce;
+    }
+    private void OnJointBreak(float breakForce)
+    {
+        Debug.Log("Leaving orbit!" + gameObject.name);
+        myAttractor.RemoveItem(gameObject.GetComponent<InteractableObject>());
+    }
+
     #endregion
 }

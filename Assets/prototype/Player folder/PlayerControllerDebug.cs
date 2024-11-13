@@ -211,6 +211,7 @@ public class PlayerControllerDebug : MonoBehaviour
             gravityField.transform.up = myCamera.transform.up;
         }
         gravityField.transform.position = transform.position;
+        gravityField.transform.rotation = transform.rotation;
     }
     
     //Events that are called upon to make changes
