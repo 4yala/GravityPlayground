@@ -19,7 +19,7 @@ public class InteractableObject : MonoBehaviour
     [SerializeField] public bool launched;
 
     [Header("Attraction settings")] 
-    [SerializeField] HingeJoint myJoint;
+    [SerializeField] ConfigurableJoint myJoint;
     [SerializeField] float min, max, breakForce;
     
     #endregion
@@ -55,8 +55,10 @@ public class InteractableObject : MonoBehaviour
             myAttractor = attractor;
             orbiting = true;
             holdsterTarget = incomingTarget;
+            gameObject.transform.SetParent(holdsterTarget);
+            gameObject.transform.localPosition = Vector3.zero;
             ProfileAttraction(holdsterTarget.GetComponent<Rigidbody>());
-            gravity.SetZeroGravity(0f);
+            gravity.SetZeroGravity(3f);
         }
         else
         {
@@ -64,11 +66,11 @@ public class InteractableObject : MonoBehaviour
             Debug.Log("breaking connection" + gameObject.name);
             orbiting = false;
             holdsterTarget = incomingTarget;
+            gameObject.transform.SetParent(null);
             if (myJoint)
             {
                 myJoint.breakForce = 0f;
                 Destroy(myJoint);
-                myJoint = null;
             }
             
             if (!retainGravity)
@@ -82,6 +84,8 @@ public class InteractableObject : MonoBehaviour
     {
         if (enable)
         {
+            gameObject.transform.SetParent(pointToGo);
+            gameObject.transform.localPosition = Vector3.zero;
             launchPoint = pointToGo;
             myJoint.connectedBody = launchPoint.GetComponent<Rigidbody>();
         }
@@ -91,6 +95,13 @@ public class InteractableObject : MonoBehaviour
             if (holdsterTarget)
             {
                 myJoint.connectedBody = holdsterTarget.GetComponent<Rigidbody>();
+                gameObject.transform.SetParent(holdsterTarget);
+                gameObject.transform.localPosition = Vector3.zero;
+            }
+
+            else
+            {
+                gameObject.transform.SetParent(null);
             }
             Debug.Log("missing function");
             //lerp position back to a designated place
@@ -100,17 +111,20 @@ public class InteractableObject : MonoBehaviour
     void ProfileAttraction(Rigidbody attractionPoint)
     {
         
-        myJoint = gameObject.AddComponent<HingeJoint>();
+        myJoint = gameObject.AddComponent<ConfigurableJoint>();
         myJoint.connectedBody = attractionPoint;
         myJoint.autoConfigureConnectedAnchor = false;
         myJoint.anchor = Vector3.zero;
-        //myJoint.minDistance = min;
+        myJoint.linearLimit = new SoftJointLimit{limit = max};
+        myJoint.xMotion = ConfigurableJointMotion.Limited;
+        myJoint.yMotion = ConfigurableJointMotion.Limited;
+        myJoint.zMotion = ConfigurableJointMotion.Limited;
         //myJoint.maxDistance = max;
         myJoint.breakForce = breakForce;
     }
     private void OnJointBreak(float breakForce)
     {
-        Debug.Log("Leaving orbit!" + gameObject.name);
+        Debug.Log("Leaving orbit! " + gameObject.name);
         myAttractor.RemoveItem(gameObject.GetComponent<InteractableObject>());
     }
 

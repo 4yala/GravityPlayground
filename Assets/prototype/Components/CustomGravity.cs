@@ -22,6 +22,8 @@ public class CustomGravity : MonoBehaviour
         myGravitationalForce = GetComponent<ConstantForce>();
         rb = GetComponent<Rigidbody>();
         rb.useGravity = false;
+        rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
+        
         //initialise with gravity pulling down
         myGravitationalForce.force = Vector3.down * gravityForceUnit;
         gravitationalDirection = Vector3.down;

@@ -6,24 +6,55 @@ using UnityEngine;
 public class GravityField : MonoBehaviour
 {
     #region Variables
-    //vvv these two lists are correspondent with each other, they must always be the same length and update accordingly
+    [Header("Inventory references")]
     [SerializeField] List<Transform> targetLocks;
     [SerializeField] public List<bool> slotAvailability;
-    //^^^
     [SerializeField] Transform shootPoint;
+    
+    [Header("Inventory")]
     [SerializeField] InteractableObject objectToShoot;
     [SerializeField] float projectileLife;
-    
-    //this list will communicate with the other two lists to check if it's able to join up, however will the dynamic unlike the other two.
     [SerializeField] public List<InteractableObject> objectsInOrbit;
     [SerializeField] public List<InteractableObject> objectsOutOfOrbit;
+
+    [Header("Movement Values")] 
+    [SerializeField] float rotationSpeed;
     
-    //does it need just the player?
+    [Header("External references")]
     [SerializeField] public PlayerControllerDebug owner;
     
     #endregion
 
+    void Update()
+    {
+        //follow the players position
+        transform.position = owner.transform.position;
+        //rotation to follow camera direction across a horizontal plane
+        if (!objectToShoot)
+        {
+            Vector3 flattenedForward = Vector3.ProjectOnPlane(owner.myCamera.transform.forward, owner.transform.up);
+            Quaternion targetRotation = Quaternion.LookRotation(flattenedForward, owner.transform.up);
+            if (transform.rotation != targetRotation)
+            {
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed*Time.deltaTime);
+            }
+        }
+        
+        //rotation to follow the characters direction on a vertical plane
+        else
+        {
+            Vector3 flattenedForward = Vector3.ProjectOnPlane(owner.transform.forward, owner.myCamera.transform.up);
+            Quaternion targetRotation = Quaternion.LookRotation(flattenedForward, owner.myCamera.transform.up);
+            if (transform.rotation != targetRotation)
+            {
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed*Time.deltaTime);
+            }
+        }
+    }
+
     #region Inventory changes
+    
+    //add items when it comes into contact with field
     void OnTriggerEnter(Collider other)
     {
         //check if item can be picked up
@@ -50,7 +81,7 @@ public class GravityField : MonoBehaviour
                     //find an available index to lock the object to
                     if (slotAvailability[i])
                     {
-                        objectsInOrbit[incomingId].ToggleOrbit(true, targetLocks[i]);
+                        objectsInOrbit[incomingId].ToggleOrbit(true, targetLocks[i],false, gameObject.GetComponent<GravityField>());
                         slotAvailability[i] = false;
                         return;
                     }
@@ -67,7 +98,7 @@ public class GravityField : MonoBehaviour
         //clear item and self from communications
         int leavingID = targetLocks.IndexOf(item.holdsterTarget);
         slotAvailability[leavingID] = true;
-        item.ToggleOrbit(false,null, shooting);
+        item.ToggleOrbit(false,null, shooting, gameObject.GetComponent<GravityField>());
         objectsInOrbit.Remove(item);
     }
     
@@ -99,6 +130,8 @@ public class GravityField : MonoBehaviour
 
 
     #region Shooting Events
+    
+    //enable aiming
     public void TriggerAim(bool toggle)
     {
         //logically speaking this should only be called if there are objects in orbit
@@ -126,6 +159,8 @@ public class GravityField : MonoBehaviour
             owner.aimedDownSights = false;
         }
     }
+    
+    //select a new item to shoot
     public void ScrollOrbit(float inputValue)
     {
         //avoid breakage if list is empty
@@ -166,6 +201,8 @@ public class GravityField : MonoBehaviour
         objectToShoot = objectsInOrbit[newObjectID];
         objectToShoot.ReadyObject(true,shootPoint);
     }
+    
+    //shoot selected item
     public void ShootObject(Vector3 direction)
     {
         //shoot if there's an object ready
@@ -193,6 +230,8 @@ public class GravityField : MonoBehaviour
 
         }
     }
+    
+    //start life of gravitational influence per object
     IEnumerator StartEffectTimer(InteractableObject shotObject)
     {
         yield return new WaitForSeconds(projectileLife);

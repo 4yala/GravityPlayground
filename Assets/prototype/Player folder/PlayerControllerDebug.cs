@@ -16,12 +16,17 @@ public class PlayerControllerDebug : MonoBehaviour
     [SerializeField] GravityField gravityField;
     
     [Header(("Camera components"))]
-    [SerializeField] Camera myCamera;
+    [SerializeField] public Camera myCamera;
     [SerializeField] GameObject myCameraOrientation;
     [SerializeField] CinemachineFreeLook myCameraCm;
 
+    [Header("Camera components")]
+    [SerializeField] float defaultDistance;
+    [SerializeField] float aimedDistance;
+
     [Header("Grounded Movement Variables")]
     [SerializeField] float moveSpeed;
+    [SerializeField] float moveSpeedAimed;
     [SerializeField] float maxSpeedWalk;
     [SerializeField] float deceleration;
     [SerializeField] float rotationSpeed;
@@ -67,7 +72,7 @@ public class PlayerControllerDebug : MonoBehaviour
         myCameraCm.Follow = transform;
         gravityField.gameObject.SetActive(fieldEnabled);
         gravityField.owner = gameObject.GetComponent<PlayerControllerDebug>();
-
+        defaultDistance = myCameraCm.m_Orbits[1].m_Radius;
     }
 
     // Update is called once per frame
@@ -90,51 +95,73 @@ public class PlayerControllerDebug : MonoBehaviour
     // Recurring but not frame dependent functions
     void FixedUpdate()
     {
-        //relatively grounded movement (including jumping motion)
-        if (!immobile && !diving)
+        if (immobile)
         {
-            //remove later
-            myCameraCm.m_YAxisRecentering.m_enabled = false;
-            gravityField.transform.up = transform.up;
-            
-            //gather input information
-            Vector3 inputDirection = new Vector3(moveInput.x, 0, moveInput.y).normalized;
-            
-            //execute when input exists
-            if (inputDirection.magnitude > 0.1f)
+            return;
+        }
+        //relatively grounded movement (including jumping motion)
+        if (!diving)
+        {
+            if (!aimedDownSights)
             {
-                //calculate directions based on definition of up by the perspective of the camera
-                Vector3 cameraForward = Vector3.ProjectOnPlane(myCamera.transform.forward, myCameraOrientation.transform.up);
-                Vector3 cameraRight = Vector3.ProjectOnPlane(myCamera.transform.right, myCameraOrientation.transform.up);
-                
-                //translate a character direction based on input
-                Vector3 targetDirection = (cameraForward * moveInput.y  + cameraRight * moveInput.x).normalized;
-                
-                //calculate and make the player face the direction
-                Quaternion targetRotation = Quaternion.LookRotation(targetDirection, myCameraOrientation.transform.up);
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime);
-                
-                //finalise with character forward movement only, no strafing
-                if (grounded)
+                //remove later
+                myCameraCm.m_YAxisRecentering.m_enabled = false;
+            
+                //gather input information
+                Vector3 inputDirection = new Vector3(moveInput.x, 0, moveInput.y).normalized;
+            
+                //execute when input exists
+                if (inputDirection.magnitude > 0.1f)
                 {
-                    rb.AddForce(transform.forward * moveSpeed, ForceMode.Acceleration);
+                    //calculate directions based on definition of up by the perspective of the camera
+                    Vector3 cameraForward = Vector3.ProjectOnPlane(myCamera.transform.forward, myCameraOrientation.transform.up);
+                    Vector3 cameraRight = Vector3.ProjectOnPlane(myCamera.transform.right, myCameraOrientation.transform.up);
+                
+                    //translate a character direction based on input
+                    Vector3 targetDirection = (cameraForward * moveInput.y  + cameraRight * moveInput.x).normalized;
+                
+                    //calculate and make the player face the direction
+                    Quaternion targetRotation = Quaternion.LookRotation(targetDirection, myCameraOrientation.transform.up);
+                    transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime);
+                
+                    //finalise with character forward movement only, no strafing
+                    if (grounded)
+                    {
+                        rb.AddForce(transform.forward * moveSpeed, ForceMode.Acceleration);
+                    }
+                    else
+                    {
+                        rb.AddForce(transform.forward * jumpForwardSpeed, ForceMode.Acceleration);
+                    }
                 }
+                //finally, if no input is made break the player if it's grounded
                 else
                 {
-                    rb.AddForce(transform.forward * jumpForwardSpeed, ForceMode.Acceleration);
+                    if (grounded)
+                    {
+                        rb.AddForce(rb.velocity * -deceleration, ForceMode.Force);
+                    }
                 }
             }
-            //finally, if no input is made break the player if it's grounded
-            else
+            else if(grounded && aimedDownSights)
             {
-                if (grounded)
+                //match the camera's forward direction on a horizontal plane
+                Vector3 flattenedForward = Vector3.ProjectOnPlane(myCamera.transform.forward, transform.up);
+                Quaternion targetRotation = Quaternion.LookRotation(flattenedForward, transform.up);
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime);
+                
+                //movement in all directions (allow strafing)
+                if (moveInput.magnitude > 0.1f)
                 {
-                    rb.AddForce(rb.velocity * -deceleration, ForceMode.Force);
+                    Vector3 targetMovement = transform.forward * moveInput.y + transform.right * moveInput.x;
+                    rb.AddForce(targetMovement * moveSpeedAimed, ForceMode.Acceleration);
+                    
                 }
             }
         }
+
         //aerial movement (diving in the air)
-        else if (!immobile && diving)
+        else
         {
             //movement is enabled when character is in proper position (head first)
             if (transform.up == gravity.gravitationalDirection)
@@ -203,15 +230,7 @@ public class PlayerControllerDebug : MonoBehaviour
             Quaternion targetRotation = Quaternion.FromToRotation(transform.up, gravity.gravitationalDirection) * transform.rotation;
             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 50f * Time.fixedDeltaTime);
             
-        }
-        
-        //gravity field  updates, fix later or implement in other script
-        else if (zerograv)
-        {
-            gravityField.transform.up = myCamera.transform.up;
-        }
-        gravityField.transform.position = transform.position;
-        gravityField.transform.rotation = transform.rotation;
+        }   
     }
     
     //Events that are called upon to make changes
@@ -246,20 +265,13 @@ public class PlayerControllerDebug : MonoBehaviour
             yield return null;
         }
         //double checkers
-        //rb.freezeRotation = true;
         transform.rotation = targetRotation;
-        Debug.Log(hit.normal);
-        Debug.Log(transform.up);
         //set status
         grounded = true;
         if (smoothGravity)
         {
 
             gravity.SetNewGravity(gravity.gravitationalDirection, true,groundedDrag);
-            //all does this ^^
-            //Vector3 newGravity = gravitationalDirection.normalized * gravityForce;
-            //myGravity.force = newGravity;
-            
             shiftDiving = false;
         }
         //now move on to do camera
@@ -444,10 +456,6 @@ public class PlayerControllerDebug : MonoBehaviour
                 //disable gravitational forces
                 //use new gravity component
                 gravity.SetZeroGravity(zeroGravDrag);
-                //^^ all happens here
-                //myGravity.force *= 0f;
-                //rb.freezeRotation = false;
-                //rb.drag = zeroGravDrag;
                 
                 
                 //immobilise player
@@ -468,11 +476,6 @@ public class PlayerControllerDebug : MonoBehaviour
                 
                 gravity.SetNewGravity(cameraDirection, true, freeFallDrag);
                 //^^^^^ all of this happens in this function
-                //gravitationalDirection = cameraDirection;
-                //Vector3 newGravity = cameraDirection.normalized * gravityForce;
-                //myGravity.force = newGravity;
-                //rb.freezeRotation = true;
-                //rb.drag = freeFallDrag;
                 
                 //unlock player
                 immobile = false;
@@ -509,6 +512,7 @@ public class PlayerControllerDebug : MonoBehaviour
         {
             //aimedDownSights = true;
             gravityField.TriggerAim(true);
+            myCameraCm.m_Orbits[1].m_Radius = aimedDistance;
         }
         
         //cancel when let go of input
@@ -517,6 +521,7 @@ public class PlayerControllerDebug : MonoBehaviour
         {
             //aimedDownSights = false;
             gravityField.TriggerAim(false);
+            myCameraCm.m_Orbits[1].m_Radius = defaultDistance;
         }
     }
     public void ScrollObjects(InputAction.CallbackContext context)
