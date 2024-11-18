@@ -18,22 +18,30 @@ public class PlayerControllerDebug : MonoBehaviour
     [Header(("Camera components"))]
     [SerializeField] public Camera myCamera;
     [SerializeField] GameObject myCameraOrientation;
-    [SerializeField] CinemachineFreeLook myCameraCm;
+    [SerializeField] public CinemachineFreeLook myCameraCm;
 
     [Header("Camera components")]
-    [SerializeField] float defaultDistance;
-    [SerializeField] float aimedDistance;
+    [SerializeField] public float defaultDistance = 4f;
+    [SerializeField] public float aimedDistance = 3f;
 
     [Header("Grounded Movement Variables")]
-    [SerializeField] float moveSpeed;
-    [SerializeField] float moveSpeedAimed;
+    [SerializeField] float moveSpeed = 20f;
+    [SerializeField] float moveSpeedAimed = 10f;
     [SerializeField] float maxSpeedWalk;
-    [SerializeField] float deceleration;
-    [SerializeField] float rotationSpeed;
-    [SerializeField] float jumpForce;
-    [SerializeField] float groundedDrag;
-    [SerializeField] float zeroGravDrag;
-    [SerializeField] float freeFallDrag;
+    [SerializeField] float deceleration = 20f;
+    [SerializeField] float rotationSpeed = 1000f;
+    [SerializeField] float jumpForce = 4f;
+    [SerializeField] float groundedDrag = 2.5f;
+    [SerializeField] float zeroGravDrag = 3;
+    [SerializeField] float freeFallDrag = 0f;
+    
+    
+    
+    
+    
+    
+    
+    
     
     [Header("Aerial Movement Variables ")]
     [SerializeField] float jumpForwardSpeed;
@@ -72,7 +80,7 @@ public class PlayerControllerDebug : MonoBehaviour
         myCameraCm.Follow = transform;
         gravityField.gameObject.SetActive(fieldEnabled);
         gravityField.owner = gameObject.GetComponent<PlayerControllerDebug>();
-        defaultDistance = myCameraCm.m_Orbits[1].m_Radius;
+        myCameraCm.m_Orbits[1].m_Radius = defaultDistance;
     }
 
     // Update is called once per frame
@@ -89,6 +97,7 @@ public class PlayerControllerDebug : MonoBehaviour
                 CheckDive();
             }
         }
+        Debug.Log(rb.velocity.magnitude);   
         //camera checks??
     }
     
@@ -168,10 +177,10 @@ public class PlayerControllerDebug : MonoBehaviour
             {
                 //fix camera
                 Quaternion cameraTargetDirection = Quaternion.LookRotation(transform.up, -transform.forward);
-                myCameraOrientation.transform.rotation = Quaternion.RotateTowards(myCameraOrientation.transform.rotation, cameraTargetDirection, diveCameraRotationSpeed * Time.fixedDeltaTime);
-                gravityField.transform.up = -transform.forward;
+                //myCameraOrientation.transform.rotation = Quaternion.RotateTowards(myCameraOrientation.transform.rotation, cameraTargetDirection, diveCameraRotationSpeed * Time.fixedDeltaTime);
                 
                 //recentre the camera ONCE after it begins diving.
+                /*
                 if (myCameraOrientation.transform.forward == transform.up)
                 {
                     //vvvvvv
@@ -190,16 +199,18 @@ public class PlayerControllerDebug : MonoBehaviour
                         requireRecentre = false;
                     }
                     //^^^^^^^^^
-
+                
                 }
-
+                */
+                
+                
                 //check if there's active input for character rotation
                 if (rotateInput != 0)
                 {
                     float rotationAmount = diveRotationSpeed * rotateInput * Time.deltaTime;
                     transform.Rotate(0, rotationAmount, 0);
                     //fix camera when it rotates??
-                    myCameraCm.m_YAxisRecentering.m_enabled = true;
+                    //myCameraCm.m_YAxisRecentering.m_enabled = true;
                 }
                 
                 //calculate movement
@@ -208,11 +219,11 @@ public class PlayerControllerDebug : MonoBehaviour
                 if (targetMovement.magnitude > 0.1f)
                 {
                     rb.AddForce(targetMovement * airDiveSpeed, ForceMode.Acceleration);
-                    myCameraCm.m_YAxisRecentering.m_enabled = true;
+                    //myCameraCm.m_YAxisRecentering.m_enabled = true;
                 }
                 if(rotateInput == 0 && targetMovement.magnitude <= 0)
                 {
-                    myCameraCm.m_YAxisRecentering.m_enabled = false;
+                    //myCameraCm.m_YAxisRecentering.m_enabled = false;
                 }
 
                 //properly implement terminal velocity later
@@ -275,6 +286,8 @@ public class PlayerControllerDebug : MonoBehaviour
             shiftDiving = false;
         }
         //now move on to do camera
+        myCameraCm.m_Orbits[0].m_Radius = 1f;
+        myCameraCm.m_Orbits[2].m_Radius = 1f;
         StartCoroutine(OrientateCamera(0.5f, transform.up, true));
         
         yield return null;
@@ -360,6 +373,8 @@ public class PlayerControllerDebug : MonoBehaviour
             playerAni.SetBool("Diving", true);
             rb.drag = freeFallDrag;
             requireRecentre = true;
+            myCameraCm.m_Orbits[0].m_Radius = .1f;
+            myCameraCm.m_Orbits[2].m_Radius = .1f;
         }
         else
         {
@@ -428,12 +443,6 @@ public class PlayerControllerDebug : MonoBehaviour
         
             //configure states to correct player status no matter what scenario
             gravity.RevertGravity(true,freeFallDrag);
-            //all happens here ^^^
-            //rb.freezeRotation = true;
-            //myGravity.force = Vector3.down * gravityForce;
-            //gravitationalDirection = Vector3.down;
-            //rb.drag = freeFallDrag;
-            
             
             zerograv = false;
             immobile = false;
@@ -473,9 +482,7 @@ public class PlayerControllerDebug : MonoBehaviour
             {
                 //calculate new gravity
                 Vector3 cameraDirection = myCamera.transform.forward;
-                
                 gravity.SetNewGravity(cameraDirection, true, freeFallDrag);
-                //^^^^^ all of this happens in this function
                 
                 //unlock player
                 immobile = false;
@@ -510,18 +517,14 @@ public class PlayerControllerDebug : MonoBehaviour
         //check that there are objects to shoot with
         if (context.started && fieldEnabled && gravityField.objectsInOrbit.Count > 0)
         {
-            //aimedDownSights = true;
             gravityField.TriggerAim(true);
-            myCameraCm.m_Orbits[1].m_Radius = aimedDistance;
         }
         
         //cancel when let go of input
         //only cancel if it has been aimed to avoid breakage
         else if (context.canceled && aimedDownSights)
         {
-            //aimedDownSights = false;
             gravityField.TriggerAim(false);
-            myCameraCm.m_Orbits[1].m_Radius = defaultDistance;
         }
     }
     public void ScrollObjects(InputAction.CallbackContext context)

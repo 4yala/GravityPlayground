@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
+using UnityEngine.SocialPlatforms;
 
 [RequireComponent(typeof(CustomGravity))]
 //[RequireComponent(typeof(SpringJoint))]
@@ -17,10 +19,12 @@ public class InteractableObject : MonoBehaviour
     [SerializeField] public GravityField myAttractor;
     [SerializeField] public CustomGravity gravity;
     [SerializeField] public bool launched;
+    [SerializeField] bool queuedMovement;
 
     [Header("Attraction settings")] 
     [SerializeField] ConfigurableJoint myJoint;
-    [SerializeField] float min, max, breakForce;
+    //default values
+    [SerializeField] float min = 1f, max = 2f, breakForce = 100f, pullSpeed = 5f;
     
     #endregion
 
@@ -34,15 +38,23 @@ public class InteractableObject : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (orbiting && holdsterTarget != null && launchPoint == null)
+        if (queuedMovement && orbiting)
         {
-            //fix later
-            //gameObject.transform.position = Vector3.Lerp(gameObject.transform.position, holdsterTarget.position, Time.fixedDeltaTime);
-        }
-        else if (orbiting && holdsterTarget != null && launchPoint != null)
-        {
-            //gameObject.transform.position = Vector3.Lerp(gameObject.transform.position, launchPoint.position, Time.fixedDeltaTime);
-            //Debug.Log("readying");
+            if (launchPoint)
+            {
+                transform.position = Vector3.MoveTowards(transform.position, launchPoint.TransformPoint(Vector3.zero),  pullSpeed * Time.fixedDeltaTime);
+            }
+            else
+            {
+                transform.position = Vector3.MoveTowards(transform.position, holdsterTarget.TransformPoint(Vector3.zero),  pullSpeed * Time.fixedDeltaTime);
+            }
+            
+            if (gameObject.transform.localPosition == Vector3.zero)
+            {
+                Debug.Log("arrived at  destination");
+                LockJoint(true);
+                queuedMovement = false;
+            }
         }
     }
 
@@ -56,7 +68,8 @@ public class InteractableObject : MonoBehaviour
             orbiting = true;
             holdsterTarget = incomingTarget;
             gameObject.transform.SetParent(holdsterTarget);
-            gameObject.transform.localPosition = Vector3.zero;
+            queuedMovement = true;
+            //gameObject.transform.localPosition = Vector3.zero;
             ProfileAttraction(holdsterTarget.GetComponent<Rigidbody>());
             gravity.SetZeroGravity(3f);
         }
@@ -85,9 +98,11 @@ public class InteractableObject : MonoBehaviour
         if (enable)
         {
             gameObject.transform.SetParent(pointToGo);
-            gameObject.transform.localPosition = Vector3.zero;
+            queuedMovement = true;
             launchPoint = pointToGo;
+            LockJoint(false);
             myJoint.connectedBody = launchPoint.GetComponent<Rigidbody>();
+            
         }
         else
         {
@@ -95,8 +110,9 @@ public class InteractableObject : MonoBehaviour
             if (holdsterTarget)
             {
                 myJoint.connectedBody = holdsterTarget.GetComponent<Rigidbody>();
+                LockJoint(false);
                 gameObject.transform.SetParent(holdsterTarget);
-                gameObject.transform.localPosition = Vector3.zero;
+                queuedMovement = true;
             }
 
             else
@@ -116,11 +132,33 @@ public class InteractableObject : MonoBehaviour
         myJoint.autoConfigureConnectedAnchor = false;
         myJoint.anchor = Vector3.zero;
         myJoint.linearLimit = new SoftJointLimit{limit = max};
+        LockJoint(false);
+        
+        /*
         myJoint.xMotion = ConfigurableJointMotion.Limited;
         myJoint.yMotion = ConfigurableJointMotion.Limited;
         myJoint.zMotion = ConfigurableJointMotion.Limited;
+        */
         //myJoint.maxDistance = max;
         myJoint.breakForce = breakForce;
+    }
+
+    void LockJoint(bool toggle)
+    {
+        if (toggle)
+        {
+
+            myJoint.xMotion = ConfigurableJointMotion.Limited;
+            myJoint.yMotion = ConfigurableJointMotion.Limited;
+            myJoint.zMotion = ConfigurableJointMotion.Limited;
+        }
+        else
+        {
+            myJoint.xMotion = ConfigurableJointMotion.Free;
+            myJoint.yMotion = ConfigurableJointMotion.Free;
+            myJoint.zMotion = ConfigurableJointMotion.Free;
+        }
+
     }
     private void OnJointBreak(float breakForce)
     {

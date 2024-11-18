@@ -127,8 +127,8 @@ public class GravityField : MonoBehaviour
         objectsOutOfOrbit.Clear();
     }
     #endregion
-
-
+    
+    
     #region Shooting Events
     
     //enable aiming
@@ -143,6 +143,7 @@ public class GravityField : MonoBehaviour
             {
                 objectToShoot = objectsInOrbit[0];
                 objectToShoot.ReadyObject(true, shootPoint);
+                owner.myCameraCm.m_Orbits[1].m_Radius = owner.aimedDistance;
                 owner.aimedDownSights = true;
             }
         }
@@ -150,13 +151,13 @@ public class GravityField : MonoBehaviour
         {
             //clear object from aim position
             //there is vulnerability of error as objectToShoot may be null here
-            if (!objectToShoot)
+            if (objectToShoot)
             {
-                return;
+                objectToShoot.ReadyObject(false, null);
+                objectToShoot = null;
             }
-            objectToShoot.ReadyObject(false, null);
-            objectToShoot = null;
             owner.aimedDownSights = false;
+            owner.myCameraCm.m_Orbits[1].m_Radius = owner.defaultDistance;
         }
     }
     
@@ -166,6 +167,7 @@ public class GravityField : MonoBehaviour
         //avoid breakage if list is empty
         if (objectsInOrbit.Count == 0)
         {
+            TriggerAim(false);
             return;
         }
         
