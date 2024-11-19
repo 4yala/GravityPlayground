@@ -26,7 +26,10 @@ public class PlayerControllerDebug : MonoBehaviour
 
     [Header("Grounded Movement Variables")]
     [SerializeField] float moveSpeed = 20f;
-    [SerializeField] float moveSpeedAimed = 10f;
+    
+    //6.5 for some reason is the lowest possible before it stops moving completely
+    [Range(6.5f ,10)]
+    [SerializeField] private float moveSpeedAimed = 7f;
     [SerializeField] float maxSpeedWalk;
     [SerializeField] float minSlopeAngle;
     [SerializeField] float maxSlopeAngle;
@@ -36,14 +39,6 @@ public class PlayerControllerDebug : MonoBehaviour
     [SerializeField] float groundedDrag = 2.5f;
     [SerializeField] float zeroGravDrag = 3;
     [SerializeField] float freeFallDrag = 0f;
-    
-    
-    
-    
-    
-    
-    
-    
     
     [Header("Aerial Movement Variables ")]
     [SerializeField] float jumpForwardSpeed;
@@ -146,7 +141,6 @@ public class PlayerControllerDebug : MonoBehaviour
                         //check it's only going up
                         if (upwardSlope)
                         {
-                            Debug.Log("Walking up");
                             // angle range checker
                             if (slopeAngle > minSlopeAngle && slopeAngle <= maxSlopeAngle)
                             {
@@ -156,10 +150,6 @@ public class PlayerControllerDebug : MonoBehaviour
                             {
                                 finalDirection = Vector3.zero;
                             }
-                        }
-                        else
-                        {
-                            Debug.Log("Walking down");
                         }
                     }
                     
@@ -188,14 +178,29 @@ public class PlayerControllerDebug : MonoBehaviour
                             rb.AddForce(transform.forward * jumpForwardSpeed, ForceMode.Acceleration);
                         }
                     }
+                    //calculate velocity 
+                    Vector3 forwardVelocity = Vector3.Project(rb.velocity, transform.forward);
+                    Vector3 nonForwardVelocity = rb.velocity - forwardVelocity;
+
+                    Vector3 nonForwardDragForce = -nonForwardVelocity * 3f; //custom drag
+                    
+                    //add opposite forces to player
+                    rb.AddForce(nonForwardDragForce, ForceMode.Acceleration);
+
                 }
-                //finally, if no input is made break the player if it's grounded
+                //finally, if no input is made brake the player if it's grounded
                 else
                 {
                     if (grounded)
                     {
                         rb.AddForce(rb.velocity * -deceleration, ForceMode.Force);
                     }
+                }
+
+                if (rb.velocity.magnitude > maxSpeedWalk && grounded)
+                {
+                    Debug.Log("Max walk speed reached");
+                    rb.velocity = rb.velocity.normalized * maxSpeedWalk;
                 }
             }
             else if(grounded && aimedDownSights)
@@ -208,10 +213,27 @@ public class PlayerControllerDebug : MonoBehaviour
                 //movement in all directions (allow strafing)
                 if (moveInput.magnitude > 0.1f)
                 {
+                    //Debug.Log("moving");
                     Vector3 targetMovement = transform.forward * moveInput.y + transform.right * moveInput.x;
+                    Debug.Log("executing speed " + targetMovement * moveSpeedAimed);
                     rb.AddForce(targetMovement * moveSpeedAimed, ForceMode.Acceleration);
                     
+                    //calculate velocity 
+                    Vector3 forwardVelocity = Vector3.Project(rb.velocity, targetMovement);
+                    Vector3 nonForwardVelocity = rb.velocity - forwardVelocity;
+
+                    Vector3 nonForwardDragForce = -nonForwardVelocity * 3f; //custom drag
+                    
+                    //add opposite forces to player
+                    rb.AddForce(nonForwardDragForce, ForceMode.Acceleration);
                 }
+                
+                //add braking to the movement
+                else if (grounded)
+                {
+                    rb.AddForce(rb.velocity * -deceleration, ForceMode.Force);
+                }
+
             }
         }
 
@@ -221,68 +243,42 @@ public class PlayerControllerDebug : MonoBehaviour
             //movement is enabled when character is in proper position (head first)
             if (transform.up == gravity.gravitationalDirection)
             {
-                //fix camera
-                Quaternion cameraTargetDirection = Quaternion.LookRotation(transform.up, -transform.forward);
-                //myCameraOrientation.transform.rotation = Quaternion.RotateTowards(myCameraOrientation.transform.rotation, cameraTargetDirection, diveCameraRotationSpeed * Time.fixedDeltaTime);
-                
-                //recentre the camera ONCE after it begins diving.
-                /*
-                if (myCameraOrientation.transform.forward == transform.up)
-                {
-                    //vvvvvv
-                    if (requireRecentre)
-                    {
-                        myCameraCm.m_YAxisRecentering.m_enabled = true;
-                        myCameraCm.m_YAxis.Value = 0.5f;
-                        Debug.Log("recentering");
-                        Debug.Log(myCameraCm.m_YAxisRecentering.m_enabled);
-                        //check when its enabled
-                    }
-                    if (requireRecentre && myCameraCm.m_YAxis.Value == 0.5f)
-                    {
-                        myCameraCm.m_YAxisRecentering.m_enabled = false;
-                        Debug.Log("finished recentering");
-                        requireRecentre = false;
-                    }
-                    //^^^^^^^^^
-                
-                }
-                */
-                
-                
                 //check if there's active input for character rotation
                 if (rotateInput != 0)
                 {
                     float rotationAmount = diveRotationSpeed * rotateInput * Time.deltaTime;
                     transform.Rotate(0, rotationAmount, 0);
-                    //fix camera when it rotates??
-                    //myCameraCm.m_YAxisRecentering.m_enabled = true;
                 }
                 
                 //calculate movement
                 Vector3 targetMovement = -transform.forward * moveInput.y + transform.right * moveInput.x;
+                //drag must affect these directions
 
                 if (targetMovement.magnitude > 0.1f)
                 {
                     rb.AddForce(targetMovement * airDiveSpeed, ForceMode.Acceleration);
-                    //myCameraCm.m_YAxisRecentering.m_enabled = true;
+
+                    Vector3 lateralVelocity = rb.velocity - Vector3.Project(rb.velocity, gravity.gravitationalDirection);
+
+                    Vector3 inputDirection = -transform.forward * moveInput.y + transform.right * moveInput.x;
+                    inputDirection = inputDirection.normalized;
+
+                    float alignment = Vector3.Dot(lateralVelocity.normalized, inputDirection);
+                    if(Math.Abs(alignment) < 0.9f)
+                    {
+                        rb.AddForce(-lateralVelocity.normalized * 3f, ForceMode.Acceleration);
+                        Debug.Log("Braking the player");
+                    }
                 }
-                if(rotateInput == 0 && targetMovement.magnitude <= 0)
+                
+                //decelerate the player when no input
+                else
                 {
-                    //myCameraCm.m_YAxisRecentering.m_enabled = false;
+                    Vector3 lateralVelocity = rb.velocity - Vector3.Project(rb.velocity, gravity.gravitationalDirection);
+                    rb.AddForce(-lateralVelocity*3f, ForceMode.Acceleration);
                 }
-
-                //properly implement terminal velocity later
-                //if up velocity > max dive speed.....
-                //dot product = q
-                //velocity.magnitude  * cos q
-                //get velocity towards gravitational direction
-                //checker then apply or stop applying force until terminal velocity
                 
-                
-                //double checker, not sure if this is necessary
-                //gravitational direction is already between 1- and 1, but normalize rounds it up to 2 decimals?
-
+                // it is not implemented yet but later here gravitational forces will increase until it hits a limit
             }
             Quaternion targetRotation = Quaternion.FromToRotation(transform.up, gravity.gravitationalDirection) * transform.rotation;
             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 50f * Time.fixedDeltaTime);

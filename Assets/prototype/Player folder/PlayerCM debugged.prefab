@@ -1013,20 +1013,20 @@ MonoBehaviour:
   playerAni: {fileID: 5893414150438550563}
   gravity: {fileID: 0}
   gravityField: {fileID: 0}
-  myInputs:
-    m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 
-    m_ActionName: 
   myCamera: {fileID: 0}
   myCameraOrientation: {fileID: 0}
   myCameraCm: {fileID: 0}
-  moveSpeed: 20
-  maxSpeedWalk: 10
+  defaultDistance: 4
+  aimedDistance: 3
+  moveSpeed: 10
+  moveSpeedAimed: 7
+  maxSpeedWalk: 15
+  minSlopeAngle: 10
+  maxSlopeAngle: 45
   deceleration: 20
   rotationSpeed: 1000
   jumpForce: 4
-  groundedDrag: 2.5
+  groundedDrag: 0
   zeroGravDrag: 3
   freeFallDrag: 3
   jumpForwardSpeed: 5
