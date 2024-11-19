@@ -28,6 +28,8 @@ public class PlayerControllerDebug : MonoBehaviour
     [SerializeField] float moveSpeed = 20f;
     [SerializeField] float moveSpeedAimed = 10f;
     [SerializeField] float maxSpeedWalk;
+    [SerializeField] float minSlopeAngle;
+    [SerializeField] float maxSlopeAngle;
     [SerializeField] float deceleration = 20f;
     [SerializeField] float rotationSpeed = 1000f;
     [SerializeField] float jumpForce = 4f;
@@ -97,7 +99,7 @@ public class PlayerControllerDebug : MonoBehaviour
                 CheckDive();
             }
         }
-        Debug.Log(rb.velocity.magnitude);   
+        //Debug.Log(rb.velocity.magnitude);   
         //camera checks??
     }
     
@@ -127,20 +129,64 @@ public class PlayerControllerDebug : MonoBehaviour
                     Vector3 cameraRight = Vector3.ProjectOnPlane(myCamera.transform.right, myCameraOrientation.transform.up);
                 
                     //translate a character direction based on input
+                    //flat direction
                     Vector3 targetDirection = (cameraForward * moveInput.y  + cameraRight * moveInput.x).normalized;
-                
-                    //calculate and make the player face the direction
-                    Quaternion targetRotation = Quaternion.LookRotation(targetDirection, myCameraOrientation.transform.up);
-                    transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime);
-                
-                    //finalise with character forward movement only, no strafing
-                    if (grounded)
+                    
+                    //an external local value stored for slopes
+                    Vector3 finalDirection = targetDirection;
+                    
+                    // slope detection
+                    RaycastHit hit;
+                    if (Physics.Raycast(transform.position, -transform.up, out hit, 1.1f))
                     {
-                        rb.AddForce(transform.forward * moveSpeed, ForceMode.Acceleration);
+                        Vector3  slopeNormal = hit.normal;
+                        float slopeAngle = Vector3.Angle(slopeNormal, myCameraOrientation.transform.up);
+                        bool upwardSlope = Vector3.Dot(transform.forward, slopeNormal) < 0;
+                        
+                        //check it's only going up
+                        if (upwardSlope)
+                        {
+                            Debug.Log("Walking up");
+                            // angle range checker
+                            if (slopeAngle > minSlopeAngle && slopeAngle <= maxSlopeAngle)
+                            {
+                                finalDirection = Vector3.ProjectOnPlane(targetDirection, slopeNormal).normalized;
+                            }
+                            else if (slopeAngle > maxSlopeAngle)
+                            {
+                                finalDirection = Vector3.zero;
+                            }
+                        }
+                        else
+                        {
+                            Debug.Log("Walking down");
+                        }
                     }
-                    else
+                    
+                    //calculate and make the player face the direction if the slope allows it to
+                    if (finalDirection != Vector3.zero)
                     {
-                        rb.AddForce(transform.forward * jumpForwardSpeed, ForceMode.Acceleration);
+                        
+                        Quaternion targetRotation = Quaternion.LookRotation(targetDirection, myCameraOrientation.transform.up);
+                        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime);
+                    }
+                    
+                    //make sure the character faces the direction that it's moving towards
+                    float directionAligntment = Vector3.Dot(transform.forward, targetDirection);
+                    bool aligned = directionAligntment >= 0.9f;
+                    
+                    //move off if character matches direction
+                    if (aligned)
+                    {
+                        //finalise with character forward movement only, no strafing
+                        if (grounded)
+                        {
+                            rb.AddForce(finalDirection * moveSpeed, ForceMode.Acceleration);
+                        }
+                        else
+                        {
+                            rb.AddForce(transform.forward * jumpForwardSpeed, ForceMode.Acceleration);
+                        }
                     }
                 }
                 //finally, if no input is made break the player if it's grounded

@@ -2396,6 +2396,14 @@ PrefabInstance:
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: -2724383346561695525, guid: 23e8bdd0706077c46b72931237553dfa, type: 3}
+      propertyPath: maxSlopeAngle
+      value: 45
+      objectReference: {fileID: 0}
+    - target: {fileID: -2724383346561695525, guid: 23e8bdd0706077c46b72931237553dfa, type: 3}
+      propertyPath: minSlopeAngle
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: -2724383346561695525, guid: 23e8bdd0706077c46b72931237553dfa, type: 3}
       propertyPath: moveSpeedAimed
       value: 10
       objectReference: {fileID: 0}
