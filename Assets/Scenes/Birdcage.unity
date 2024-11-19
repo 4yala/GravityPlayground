@@ -2573,10 +2573,6 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -2724383346561695525, guid: 23e8bdd0706077c46b72931237553dfa, type: 3}
-      propertyPath: moveSpeed
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: -2724383346561695525, guid: 23e8bdd0706077c46b72931237553dfa, type: 3}
       propertyPath: myCameraCm
       value: 
       objectReference: {fileID: 1918656914}
@@ -2584,34 +2580,6 @@ PrefabInstance:
       propertyPath: gravityField
       value: 
       objectReference: {fileID: 2145201795}
-    - target: {fileID: -2724383346561695525, guid: 23e8bdd0706077c46b72931237553dfa, type: 3}
-      propertyPath: groundedDrag
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -2724383346561695525, guid: 23e8bdd0706077c46b72931237553dfa, type: 3}
-      propertyPath: maxSpeedWalk
-      value: 15
-      objectReference: {fileID: 0}
-    - target: {fileID: -2724383346561695525, guid: 23e8bdd0706077c46b72931237553dfa, type: 3}
-      propertyPath: aimedDistance
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: -2724383346561695525, guid: 23e8bdd0706077c46b72931237553dfa, type: 3}
-      propertyPath: maxSlopeAngle
-      value: 45
-      objectReference: {fileID: 0}
-    - target: {fileID: -2724383346561695525, guid: 23e8bdd0706077c46b72931237553dfa, type: 3}
-      propertyPath: minSlopeAngle
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: -2724383346561695525, guid: 23e8bdd0706077c46b72931237553dfa, type: 3}
-      propertyPath: moveSpeedAimed
-      value: 7
-      objectReference: {fileID: 0}
-    - target: {fileID: -2724383346561695525, guid: 23e8bdd0706077c46b72931237553dfa, type: 3}
-      propertyPath: defaultDistance
-      value: 4
-      objectReference: {fileID: 0}
     - target: {fileID: -2724383346561695525, guid: 23e8bdd0706077c46b72931237553dfa, type: 3}
       propertyPath: myCameraOrientation
       value: 
