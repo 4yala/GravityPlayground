@@ -125,6 +125,15 @@ public partial class @GravControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""ResetCamera"",
+                    ""type"": ""Button"",
+                    ""id"": ""9545ab49-8a48-40c8-ab72-653e363952b9"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -303,6 +312,17 @@ public partial class @GravControls: IInputActionCollection2, IDisposable
                     ""action"": ""Scroll"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""19d421e7-113c-4b4b-9307-fe6b54471897"",
+                    ""path"": ""<Mouse>/middleButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ResetCamera"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -322,6 +342,7 @@ public partial class @GravControls: IInputActionCollection2, IDisposable
         m_Player_Aim = m_Player.FindAction("Aim", throwIfNotFound: true);
         m_Player_Shoot = m_Player.FindAction("Shoot", throwIfNotFound: true);
         m_Player_Scroll = m_Player.FindAction("Scroll", throwIfNotFound: true);
+        m_Player_ResetCamera = m_Player.FindAction("ResetCamera", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -394,6 +415,7 @@ public partial class @GravControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Aim;
     private readonly InputAction m_Player_Shoot;
     private readonly InputAction m_Player_Scroll;
+    private readonly InputAction m_Player_ResetCamera;
     public struct PlayerActions
     {
         private @GravControls m_Wrapper;
@@ -409,6 +431,7 @@ public partial class @GravControls: IInputActionCollection2, IDisposable
         public InputAction @Aim => m_Wrapper.m_Player_Aim;
         public InputAction @Shoot => m_Wrapper.m_Player_Shoot;
         public InputAction @Scroll => m_Wrapper.m_Player_Scroll;
+        public InputAction @ResetCamera => m_Wrapper.m_Player_ResetCamera;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -451,6 +474,9 @@ public partial class @GravControls: IInputActionCollection2, IDisposable
             @Scroll.started += instance.OnScroll;
             @Scroll.performed += instance.OnScroll;
             @Scroll.canceled += instance.OnScroll;
+            @ResetCamera.started += instance.OnResetCamera;
+            @ResetCamera.performed += instance.OnResetCamera;
+            @ResetCamera.canceled += instance.OnResetCamera;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -488,6 +514,9 @@ public partial class @GravControls: IInputActionCollection2, IDisposable
             @Scroll.started -= instance.OnScroll;
             @Scroll.performed -= instance.OnScroll;
             @Scroll.canceled -= instance.OnScroll;
+            @ResetCamera.started -= instance.OnResetCamera;
+            @ResetCamera.performed -= instance.OnResetCamera;
+            @ResetCamera.canceled -= instance.OnResetCamera;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -518,5 +547,6 @@ public partial class @GravControls: IInputActionCollection2, IDisposable
         void OnAim(InputAction.CallbackContext context);
         void OnShoot(InputAction.CallbackContext context);
         void OnScroll(InputAction.CallbackContext context);
+        void OnResetCamera(InputAction.CallbackContext context);
     }
 }
