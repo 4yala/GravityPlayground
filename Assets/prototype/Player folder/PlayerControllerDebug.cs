@@ -39,11 +39,13 @@ public class PlayerControllerDebug : MonoBehaviour
     [Header("Grounded Movement Variables")]
     [Tooltip("Grounded acceleration speed (gradual force)")]
     [SerializeField] float moveSpeed = 8f;
+    [Tooltip("Maximum grounded speed")]
+    [SerializeField] float maxSpeedWalk = 10f;
     [Tooltip("Lesser acceleration speed when aimed (gradual force)")]
     [Range(6.5f ,10)]
     [SerializeField] float moveSpeedAimed = 7f; //6.5 for some reason is the lowest possible before it stops moving completely
-    [Tooltip("Maximum grounded speed")]
-    [SerializeField] float maxSpeedWalk = 10f;
+    [Tooltip("Maximum slowed speed for aimed in state")] 
+    [SerializeField] float maxSpeedAimed = 3f;
     [Tooltip("Minimum angle for slope recognition")]
     [SerializeField] float minSlopeAngle = 10f;
     [Tooltip("Maximum acceptable angle for slope")]
@@ -62,20 +64,25 @@ public class PlayerControllerDebug : MonoBehaviour
     [Header("Aerial Movement Variables ")]
     [Tooltip("Aerial acceleration speed when relatively close to ground (gradual force)")]
     [SerializeField] float jumpForwardSpeed;
-    [Tooltip("Lateral acceleration speed diving (gradual force)")]
-    [SerializeField] float airDiveSpeed;
+    [Tooltip("Lateral acceleration speed when diving (gradual force)")]
+    [SerializeField] float lateralAirDiveSpeed;
+    [Tooltip("Max lateral speed when diving")]
+    [SerializeField] float maxLateralSpeed;
     [Tooltip("Air dive acceleration speed (gradual force)")]
     [SerializeField] float diveAcceleration;
     [Tooltip("Terminal velocity for air dive")]
     [SerializeField] float maxDiveSpeed;
     [Tooltip("Character rotation speed when diving")]
     [SerializeField] float diveRotationSpeed;
-    [Tooltip("Required object distance until character dives")]
+    [Tooltip("Required object distance until character dives (world unit)")]
     [SerializeField] float diveLength;
+    [Tooltip("Required wait time until character dives (seconds)")]
+    [SerializeField] float diveWaitTime;
     
-    [Header("Input values (Only for visualising)")]
+    [Header("Cached values (Only for visualising)")]
     [SerializeField] Vector2 moveInput;
     [SerializeField] float rotateInput;
+    [SerializeField] Vector3 cameraRight;
     
     [Header("Player States (Only for visualising)")]
     [SerializeField] bool zerograv;
@@ -83,6 +90,7 @@ public class PlayerControllerDebug : MonoBehaviour
     [SerializeField] bool immobile;
     [SerializeField] bool grounded;
     [SerializeField] bool diving;
+    [SerializeField] bool noGroundDetected;
     [SerializeField] bool shiftDiving; //to be used only when toggling out from zero gravity, in order to smooth landing.
     [SerializeField] bool cameraTransitioned;
     [SerializeField] bool fieldEnabled;
@@ -112,6 +120,7 @@ public class PlayerControllerDebug : MonoBehaviour
     void Update()
     {
         AnimationStates();
+        HandleCameraDirection();
         if (!zerograv)
         {
             //check grounded
@@ -245,7 +254,7 @@ public class PlayerControllerDebug : MonoBehaviour
                         rb.AddForce(rb.velocity * -deceleration, ForceMode.Force);
                     }
                 }
-
+                // prevent from building infinite speed
                 if (rb.velocity.magnitude > maxSpeedWalk && grounded)
                 {
                     Debug.Log("Max walk speed reached");
@@ -282,7 +291,12 @@ public class PlayerControllerDebug : MonoBehaviour
                 {
                     rb.AddForce(rb.velocity * -deceleration, ForceMode.Force);
                 }
-
+                // prevent from building infinite speed
+                if (rb.velocity.magnitude > maxSpeedAimed && grounded)
+                {
+                    Debug.Log("Max speed reached");
+                    rb.velocity = rb.velocity.normalized * maxSpeedAimed;
+                }
             }
         }
 
@@ -302,16 +316,15 @@ public class PlayerControllerDebug : MonoBehaviour
                 //calculate movement
                 Vector3 targetMovement = -transform.forward * moveInput.y + transform.right * moveInput.x;
                 //drag must affect these directions
-
+                Vector3 lateralVelocity = rb.velocity - Vector3.Project(rb.velocity, gravity.gravitationalDirection);
                 if (targetMovement.magnitude > 0.1f)
                 {
-                    rb.AddForce(targetMovement * airDiveSpeed, ForceMode.Acceleration);
-
-                    Vector3 lateralVelocity = rb.velocity - Vector3.Project(rb.velocity, gravity.gravitationalDirection);
+                    rb.AddForce(targetMovement * lateralAirDiveSpeed, ForceMode.Acceleration);
 
                     Vector3 inputDirection = -transform.forward * moveInput.y + transform.right * moveInput.x;
                     inputDirection = inputDirection.normalized;
-
+                    
+                    //brake the player if it doesn't match the input direction
                     float alignment = Vector3.Dot(lateralVelocity.normalized, inputDirection);
                     if(Math.Abs(alignment) < 0.9f)
                     {
@@ -323,11 +336,38 @@ public class PlayerControllerDebug : MonoBehaviour
                 //decelerate the player when no input
                 else
                 {
-                    Vector3 lateralVelocity = rb.velocity - Vector3.Project(rb.velocity, gravity.gravitationalDirection);
                     rb.AddForce(-lateralVelocity*3f, ForceMode.Acceleration);
                 }
+                //calculate the velocity along the lateral plane from the gravitational direction
+                float lateralSpeed =  lateralVelocity.magnitude;
+                if (lateralSpeed > maxLateralSpeed)
+                {
+                    //calculate a max lateral speed
+                    Vector3 clampedLateralSpeed = lateralVelocity.normalized * maxLateralSpeed;
+                    //grab the current velocity and just add the lateral speed as appropriate
+                    rb.velocity = Vector3.Project(rb.velocity, gravity.gravitationalDirection) + clampedLateralSpeed;
+                    Debug.Log("Maxing out lateral speed");  
+                }
                 
-                // it is not implemented yet but later here gravitational forces will increase until it hits a limit
+                //calculate velocity along the gravitational direction
+                Vector3 fallingSpeed = Vector3.Project(rb.velocity, gravity.gravitationalDirection);
+                //if the falling speed does not exceed the maximum dive speed, increase by acceleration
+                if (fallingSpeed.magnitude < maxDiveSpeed)
+                {
+                    rb.AddForce(gravity.gravitationalDirection * diveAcceleration, ForceMode.Acceleration);
+                    Debug.Log("Increasing dive speed");
+                }
+                
+                if (fallingSpeed.magnitude > maxDiveSpeed)
+                {
+                    //grab current velocity
+                    Vector3 currentVelocity = rb.velocity;
+                    //calculate velocity proportionate to falling direction
+                    Vector3 velocityAlongFall = Vector3.Project(currentVelocity, gravity.gravitationalDirection);
+                    //hard set velocity to maximum falling speed + current velocity STRIPPED of the falling velocity, leaving any other forces (for example lateral velocity)
+                    rb.velocity = Vector3.Project(rb.velocity, gravity.gravitationalDirection).normalized * maxDiveSpeed + (currentVelocity - velocityAlongFall);
+                    Debug.Log("Terminal velocity reached");
+                }
             }
             Quaternion targetRotation = Quaternion.FromToRotation(transform.up, gravity.gravitationalDirection) * transform.rotation;
             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 50f * Time.fixedDeltaTime);
@@ -403,6 +443,26 @@ public class PlayerControllerDebug : MonoBehaviour
         myCameraOrientation.transform.rotation = targetRotation;
         yield return null;
     }
+
+    IEnumerator QueueDive()
+    {
+        noGroundDetected = true;
+        yield return new WaitForSeconds(diveWaitTime);
+        if (noGroundDetected)
+        {
+            diving = true;
+            playerAni.SetBool("Diving", true);
+            myCameraCm.m_Orbits[0].m_Radius = .1f;
+            myCameraCm.m_Orbits[2].m_Radius = .1f;
+            Debug.Log("Count down finished and diving");
+        }
+    }
+    
+    //update camera reference
+    void UpdateCameraDirection()
+    {
+        cameraRight = Vector3.ProjectOnPlane(myCamera.transform.right, myCameraOrientation.transform.up);
+    }
     
     //fix animation controller when necessary
     void SetSingleAnimation(string stateName)
@@ -452,7 +512,6 @@ public class PlayerControllerDebug : MonoBehaviour
             rb.drag = 0f;
         }
     }
-
     void CheckGroundedNew()
     {
         RaycastHit hit  = new RaycastHit();
@@ -490,6 +549,7 @@ public class PlayerControllerDebug : MonoBehaviour
                     StartCoroutine(LandPlayer(hit,.5f, shiftDiving));
                 }
                 result = true;
+                noGroundDetected = false;
                 //Debug.Log($"Ray hit object: {hit.collider.name} at {hit.point} with layer: {LayerMask.LayerToName(hit.collider.gameObject.layer)}");
                 break;
             }
@@ -502,20 +562,38 @@ public class PlayerControllerDebug : MonoBehaviour
         Debug.DrawRay(transform.position, gravity.gravitationalDirection * diveLength, Color.red);
         if (!Physics.Raycast(transform.position, gravity.gravitationalDirection, out hit, diveLength))
         {
-            diving = true;
-            Debug.Log("Triggering dive");
-            playerAni.SetBool("Diving", true);
-            myCameraCm.m_Orbits[0].m_Radius = .1f;
-            myCameraCm.m_Orbits[2].m_Radius = .1f;
+            if (!noGroundDetected)
+            {
+                Debug.Log("Starting dive check");
+                if (shiftDiving)
+                {
+                    diving = true;
+                    playerAni.SetBool("Diving", true);
+                    myCameraCm.m_Orbits[0].m_Radius = .1f;
+                    myCameraCm.m_Orbits[2].m_Radius = .1f;
+                }
+                else
+                {
+                    StartCoroutine(QueueDive());
+                }
+            }
         }
         else
         {
             //unnecessary??
             playerAni.SetBool("Diving", false);
-            diving = false;
+            noGroundDetected = false;
         }
     }
     
+    //check camera input
+    void HandleCameraDirection()
+    {
+        if (myCameraCm.m_YAxis.m_InputAxisValue != 0)
+        {
+            UpdateCameraDirection();
+        }
+    }
     //check corresponding animation states
     void AnimationStates()
     {
@@ -530,10 +608,7 @@ public class PlayerControllerDebug : MonoBehaviour
         }
         //check grounded state
         //if there's no movement then state will revert to grounded by default on animation behaviour
-        if (grounded)
-        {
-            playerAni.SetBool("Grounded", grounded);
-        }
+        playerAni.SetBool("Grounded", grounded);
     }
     #endregion
     
@@ -605,7 +680,7 @@ public class PlayerControllerDebug : MonoBehaviour
                 grounded = false;
                 diving = false;
                 shiftDiving = false;
-                
+                noGroundDetected = false;
 
                 SetSingleAnimation("Zero Grav");
                 //fix camera with coroutine
@@ -620,7 +695,7 @@ public class PlayerControllerDebug : MonoBehaviour
                 immobile = false;
                 zerograv = false;
                 shiftDiving = true;
-
+                noGroundDetected = false;
                 playerAni.SetBool("Zero Grav", false);
             }
         }

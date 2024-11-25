@@ -8,10 +8,17 @@ using UnityEngine;
 
 public class CustomGravity : MonoBehaviour
 {
-    #region MyRegion
-    [SerializeField] public ConstantForce myGravitationalForce;
+    #region Variables
+    [Header("Variables")]
+    [Tooltip("The direction that the gravity pulls towards (Only for visualising)")]
     [SerializeField] public Vector3 gravitationalDirection;
+    [Tooltip("The total force that the object totals to")]
     [SerializeField] public float gravityForceUnit = 9.81f;
+    
+    [Header("Components (Automated)")]
+    [Tooltip("The gravitational force executor (Automated)")]
+    [SerializeField] public ConstantForce myGravitationalForce;
+    [Tooltip("The rigidbody of the object (Automated)")]
     [SerializeField] public Rigidbody rb;
     #endregion
 

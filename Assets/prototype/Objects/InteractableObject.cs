@@ -8,24 +8,37 @@ using UnityEngine.Serialization;
 using UnityEngine.SocialPlatforms;
 
 [RequireComponent(typeof(CustomGravity))]
-//[RequireComponent(typeof(SpringJoint))]
 public class InteractableObject : MonoBehaviour
 {
     #region Variables
+    [Header("Settings")]
+    [Tooltip("The type of object it is")]
     [SerializeField] public objectType objectTag;
-    [SerializeField] public bool orbiting;
-    [SerializeField] public Transform holdsterTarget;
-    [SerializeField] public Transform launchPoint;
-    [SerializeField] public GravityField myAttractor;
+    [Tooltip("Custom gravity component")]
     [SerializeField] public CustomGravity gravity;
-    [SerializeField] public bool launched;
-    [SerializeField] bool queuedMovement;
-
+    
+    [Header("Attractor information (Only for visualising)")]
+    [Tooltip("The main slot the object is attracted to")]
+    [SerializeField] public Transform attractionPoint;
+    [Tooltip("The launch position that the object is attracted to")]
+    [SerializeField] public Transform launchPoint;
+    [Tooltip("The field component")]
+    [SerializeField] public GravityField myAttractor;
+    
     [Header("Attraction settings")] 
     [SerializeField] ConfigurableJoint myJoint;
-    //default values
-    [SerializeField] float min = 1f, max = 2f, breakForce = 100f, pullSpeed = 5f;
+    [Tooltip("Maximum distance from the attraction points until breakage")]
+    [SerializeField] float maxDistance = 2f;
+    [Tooltip("Maxmimum applied force until breakage")]
+    [SerializeField] float breakForce = 100f;
+    [Tooltip("The speed of the object when it translates between attraction points")]
+    [SerializeField] float pullSpeed = 5f;
     
+    [Header("States (Only for visualising")]
+    [SerializeField] public bool orbiting;
+    [SerializeField] public bool launched;
+    [Tooltip("For precise translation between points")]
+    [SerializeField] bool queuedMovement;
     #endregion
 
     // Start is called before the first frame update
@@ -35,7 +48,6 @@ public class InteractableObject : MonoBehaviour
         gravity = GetComponent<CustomGravity>();
     }
     
-
     void FixedUpdate()
     {
         if (queuedMovement && orbiting)
@@ -46,7 +58,7 @@ public class InteractableObject : MonoBehaviour
             }
             else
             {
-                transform.position = Vector3.MoveTowards(transform.position, holdsterTarget.TransformPoint(Vector3.zero),  pullSpeed * Time.fixedDeltaTime);
+                transform.position = Vector3.MoveTowards(transform.position, attractionPoint.TransformPoint(Vector3.zero),  pullSpeed * Time.fixedDeltaTime);
             }
             
             if (gameObject.transform.localPosition == Vector3.zero)
@@ -66,11 +78,11 @@ public class InteractableObject : MonoBehaviour
         {
             myAttractor = attractor;
             orbiting = true;
-            holdsterTarget = incomingTarget;
-            gameObject.transform.SetParent(holdsterTarget);
+            attractionPoint = incomingTarget;
+            gameObject.transform.SetParent(attractionPoint);
             queuedMovement = true;
             //gameObject.transform.localPosition = Vector3.zero;
-            ProfileAttraction(holdsterTarget.GetComponent<Rigidbody>());
+            ProfileAttraction(attractionPoint.GetComponent<Rigidbody>());
             gravity.SetZeroGravity(3f);
         }
         else
@@ -78,7 +90,7 @@ public class InteractableObject : MonoBehaviour
             myAttractor = attractor;
             Debug.Log("breaking connection" + gameObject.name);
             orbiting = false;
-            holdsterTarget = incomingTarget;
+            attractionPoint = incomingTarget;
             gameObject.transform.SetParent(null);
             if (myJoint)
             {
@@ -107,11 +119,11 @@ public class InteractableObject : MonoBehaviour
         else
         {
             launchPoint = null;
-            if (holdsterTarget)
+            if (attractionPoint)
             {
-                myJoint.connectedBody = holdsterTarget.GetComponent<Rigidbody>();
+                myJoint.connectedBody = attractionPoint.GetComponent<Rigidbody>();
                 LockJoint(false);
-                gameObject.transform.SetParent(holdsterTarget);
+                gameObject.transform.SetParent(attractionPoint);
                 queuedMovement = true;
             }
 
@@ -131,15 +143,8 @@ public class InteractableObject : MonoBehaviour
         myJoint.connectedBody = attractionPoint;
         myJoint.autoConfigureConnectedAnchor = false;
         myJoint.anchor = Vector3.zero;
-        myJoint.linearLimit = new SoftJointLimit{limit = max};
+        myJoint.linearLimit = new SoftJointLimit{limit = maxDistance};
         LockJoint(false);
-        
-        /*
-        myJoint.xMotion = ConfigurableJointMotion.Limited;
-        myJoint.yMotion = ConfigurableJointMotion.Limited;
-        myJoint.zMotion = ConfigurableJointMotion.Limited;
-        */
-        //myJoint.maxDistance = max;
         myJoint.breakForce = breakForce;
     }
 
@@ -160,7 +165,7 @@ public class InteractableObject : MonoBehaviour
         }
 
     }
-    private void OnJointBreak(float breakForce)
+    void OnJointBreak(float breakForce)
     {
         Debug.Log("Leaving orbit! " + gameObject.name);
         myAttractor.RemoveItem(gameObject.GetComponent<InteractableObject>());

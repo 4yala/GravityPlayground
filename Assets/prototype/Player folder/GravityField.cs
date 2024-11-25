@@ -7,20 +7,29 @@ public class GravityField : MonoBehaviour
 {
     #region Variables
     [Header("Inventory references")]
+    [Tooltip("Empty transform positions (Must be added as a child and then be manually added)")]
     [SerializeField] List<Transform> targetLocks;
+    [Tooltip("Secondary list that matches the target locks (Only for visualising)")]
     [SerializeField] public List<bool> slotAvailability;
+    [Tooltip("Another empty transform position which is where objects are launched from (Must be added as a child and manually added)")]
     [SerializeField] Transform shootPoint;
     
     [Header("Inventory")]
+    [Tooltip("Object held at launch point")]
     [SerializeField] InteractableObject objectToShoot;
+    [Tooltip("The length that gravitational force is applied for once launched (seconds)")]
     [SerializeField] float projectileLife;
+    [Tooltip("Objets attracted the the field (Only for visualising)")]
     [SerializeField] public List<InteractableObject> objectsInOrbit;
+    [Tooltip("Objects influenced by launch and out of field (Only for visualising)")]
     [SerializeField] public List<InteractableObject> objectsOutOfOrbit;
 
     [Header("Movement Values")] 
+    [Tooltip("The speed of which the field rotates to match directions")]
     [SerializeField] float rotationSpeed;
     
     [Header("External references")]
+    [Tooltip("Player reference (Automated)")]
     [SerializeField] public PlayerControllerDebug owner;
     
     #endregion
@@ -96,7 +105,7 @@ public class GravityField : MonoBehaviour
     public void RemoveItem(InteractableObject item, bool shooting = false)
     {
         //clear item and self from communications
-        int leavingID = targetLocks.IndexOf(item.holdsterTarget);
+        int leavingID = targetLocks.IndexOf(item.attractionPoint);
         slotAvailability[leavingID] = true;
         item.ToggleOrbit(false,null, shooting, gameObject.GetComponent<GravityField>());
         objectsInOrbit.Remove(item);
@@ -114,7 +123,7 @@ public class GravityField : MonoBehaviour
         //clear all items and dependencies
         foreach (InteractableObject item in objectsInOrbit)
         {
-            item.ToggleOrbit(false,null);
+            item.ToggleOrbit(false);
         }
         foreach (InteractableObject item in objectsOutOfOrbit)
         {
