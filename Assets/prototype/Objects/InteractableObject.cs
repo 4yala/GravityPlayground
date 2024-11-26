@@ -131,8 +131,6 @@ public class InteractableObject : MonoBehaviour
             {
                 gameObject.transform.SetParent(null);
             }
-            Debug.Log("missing function");
-            //lerp position back to a designated place
             
         }
     }

@@ -52,12 +52,25 @@ public class GravityField : MonoBehaviour
         //rotation to follow the characters direction on a vertical plane
         else
         {
-            Vector3 flattenedForward = Vector3.ProjectOnPlane(owner.transform.forward, owner.myCamera.transform.up);
-            Quaternion targetRotation = Quaternion.LookRotation(flattenedForward, owner.myCamera.transform.up);
-            if (transform.rotation != targetRotation)
+            if (owner.grounded)
             {
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed*Time.deltaTime);
+                Vector3 flattenedForward = Vector3.ProjectOnPlane(owner.transform.forward, owner.myCamera.transform.up);
+                Quaternion targetRotation = Quaternion.LookRotation(flattenedForward, owner.myCamera.transform.up);
+                if (transform.rotation != targetRotation)
+                {
+                    transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed*Time.deltaTime);
+                }  
             }
+            else if (owner.zerograv)
+            {
+                Quaternion targetRotation = owner.myCamera.transform.rotation;
+                if (transform.rotation != targetRotation)
+                {
+                    transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed*Time.deltaTime);
+                }
+                
+            }
+            
         }
     }
 
