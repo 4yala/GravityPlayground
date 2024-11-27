@@ -427,10 +427,11 @@ public class PlayerControllerDebug : MonoBehaviour
         while (elapsedTime < duration)
         {
             float t = Mathf.Clamp01(elapsedTime / duration);
-            transform.rotation = Quaternion.Slerp(startRotation, targetRotation, t);
+            //transform.rotation = Quaternion.Slerp(startRotation, targetRotation, t);
             elapsedTime += Time.deltaTime;
             yield return null;
         }
+        gravity.rb.MoveRotation(targetRotation);
         //double checkers
         transform.rotation = targetRotation;
         //set status
@@ -445,8 +446,8 @@ public class PlayerControllerDebug : MonoBehaviour
         myCameraCm.m_Orbits[2].m_Radius = 1f;
         //cameraTarget.rotation = myCamera.transform.rotation;
         //myCameraOrientation.transform.up = transform.up;
-        LockCamera(true);
         myCameraOrientation.transform.up = transform.up;
+        LockCamera(true);
         //StartCoroutine(OrientateCamera(0.5f, transform.up, true));
         landIntialised = false;
         landOnce = true;
@@ -530,12 +531,13 @@ public class PlayerControllerDebug : MonoBehaviour
 
     void SyncFreeLookCamera()
     {
-
+        cameraTarget2.transform.rotation = Quaternion.LookRotation(cameraTarget2.transform.forward, transform.up);
+        //Debug.Break();
         float newYAxis = Vector3.Dot(gravity.gravitationalDirection, myCamera.transform.forward);
         newYAxis = (newYAxis - -1) / (1 - -1) * (1 - 0) + 0;
         Debug.Log(newYAxis);
         //StartCoroutine(TransitionCamera(newYAxis));
-        myCameraCm.m_YAxis.Value = newYAxis;
+        //myCameraCm.m_YAxis.Value = newYAxis;
         //get direction from camera to target
         Vector3 direction = myCamera.transform.position - cameraTarget.position;
         
