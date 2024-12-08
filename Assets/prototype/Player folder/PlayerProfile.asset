@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e4df79726cfe744896404ced22fefec, type: 3}
+  m_Name: PlayerProfile
+  m_EditorClassIdentifier: 
+  walkAccelerationSpeed: 10
+  maxSpeedWalk: 8
+  aimedAccelerationSpeed: 7
+  maxSpeedAim: 3
+  jumpForce: 400
+  rotationSpeed: 1000
+  decelerationSpeed: 20
+  maxSlopeAngleAscent: 45
+  minSlopeAngle: 20
+  maxSlopeAngleDescent: 100
+  groundedDrag: 8
+  zeroGravDrag: 3
+  jumpForwardAccelerationSpeed: 3
+  maxSpeedJump: 3
+  diveAccelerationSpeed: 5
+  terminalVelocity: 20
+  lateralAirDiveSpeed: 3
+  maxLateralSpeed: 5
+  diveRotationSpeed: 50
+  diveLength: 15
+  diveWaitTime: 1
+  maxGravityMeter: 100
+  regenRate: 5
+  zeroGravRate: 2
+  shiftDiveRate: 5
+  groundedRate: 3
+  regenCooldownLength: 2
+  defaultDistance: 4
+  aimedDistance: 3
+  defaultSkin: {fileID: 2100000, guid: 49859074540aeaf41a9d9f22f36ee1bc, type: 2}
+  shiftedSkin: {fileID: 2100000, guid: 492f1cba0aedffc43abe9f15935817f3, type: 2}

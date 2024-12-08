@@ -165,7 +165,7 @@ public class GravityField : MonoBehaviour
             {
                 objectToShoot = objectsInOrbit[0];
                 objectToShoot.ReadyObject(true, shootPoint);
-                owner.myCameraCm.m_Orbits[1].m_Radius = owner.aimedDistance;
+                owner.myCameraCm.m_Orbits[1].m_Radius = owner.myProfile.aimedDistance;
                 owner.aimedDownSights = true;
             }
         }
@@ -179,7 +179,7 @@ public class GravityField : MonoBehaviour
                 objectToShoot = null;
             }
             owner.aimedDownSights = false;
-            owner.myCameraCm.m_Orbits[1].m_Radius = owner.defaultDistance;
+            owner.myCameraCm.m_Orbits[1].m_Radius = owner.myProfile.defaultDistance;
         }
     }
     
