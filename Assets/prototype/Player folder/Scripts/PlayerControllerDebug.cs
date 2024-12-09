@@ -40,8 +40,8 @@ public class PlayerControllerDebug : MonoBehaviour
     [SerializeField] Transform cameraTarget2;
 
     [Header("Gravity Values")] 
-    [SerializeField] Image gravityMeter;
-    [SerializeField] float currentGravityMeter;
+    [SerializeField] public Image gravityMeter;
+    [SerializeField] public float currentGravityMeter;
     [SerializeField] float currentUpdate;
     [SerializeField] bool regenCooldown;
     [SerializeField] float cooldownTimer;
@@ -175,12 +175,10 @@ public class PlayerControllerDebug : MonoBehaviour
                             if (slopeAngle > myProfile.minSlopeAngle && slopeAngle <= myProfile.maxSlopeAngleAscent)
                             {
                                 finalDirection = Vector3.ProjectOnPlane(targetDirection, slopeNormal).normalized;
-                                Debug.Log("slope detected");
                             }
                             else if (slopeAngle > myProfile.maxSlopeAngleAscent && upwardSlope)
                             {
                                 finalDirection = Vector3.zero;
-                                Debug.Log("too high");
                             }
                         }
                         else
@@ -189,13 +187,8 @@ public class PlayerControllerDebug : MonoBehaviour
                             {
                                 finalDirection = Vector3.ProjectOnPlane(targetDirection, slopeNormal).normalized;
                             }
-                            else
-                            {
-                                Debug.Log("walking forward");
-                            }
                         }
                     }
-                    Debug.Log(targetDirection == finalDirection);
                     //calculate and make the player face the direction if the slope allows it to
                     if (finalDirection != Vector3.zero)
                     {
@@ -290,7 +283,8 @@ public class PlayerControllerDebug : MonoBehaviour
         else
         {
             //movement is enabled when character is in proper position (head first)
-            if (transform.up == gravity.gravitationalDirection)
+            //there may be inaccuracies, so distance is calculated instead of a precise comparison
+            if (Vector3.Distance(transform.up, gravity.gravitationalDirection) < 0.01f)
             {
                 //check if there's active input for character rotation
                 if (rotateInput != 0)
@@ -340,8 +334,12 @@ public class PlayerControllerDebug : MonoBehaviour
                     Debug.Log("Maxing out lateral speed");  
                 }
             }
+            
             Quaternion targetRotation = Quaternion.FromToRotation(transform.up, gravity.gravitationalDirection) * transform.rotation;
             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 50f * Time.fixedDeltaTime);
+            Debug.Log(transform.up);
+            Debug.Log(gravity.gravitationalDirection);
+            
             
             //calculate velocity along the gravitational direction
             Vector3 fallingSpeed = Vector3.Project(rb.velocity, gravity.gravitationalDirection);
@@ -426,13 +424,15 @@ public class PlayerControllerDebug : MonoBehaviour
         float elapsedTime = 0;
         //set up to calculate the way the character will flip
         Quaternion targetRotation = Quaternion.identity;
-        
+        bool closeToNormalDown = (Vector3.Dot(gravity.gravitationalDirection.normalized, Vector3.down) > .9f || 
+                                  Vector3.Dot(hit.normal.normalized, Vector3.up) > .9f);
         //if gravity smoothing is on, revert to normality
-        if (Vector3.Dot(gravity.gravitationalDirection.normalized, Vector3.down) > .9f && smoothGravity)
+        if (closeToNormalDown && smoothGravity)
         {
             gravity.SoftSetGravity(Vector3.down);
             //cameraTarget.rotation = Quaternion.FromToRotation(transform.up, Vector3.up) * transform.rotation;
             shifted = false;
+            UpdatePlayerSkin(myProfile.defaultSkin);
         }
         //smooth with surface
         else if (smoothGravity)
@@ -518,6 +518,7 @@ public class PlayerControllerDebug : MonoBehaviour
     }
     IEnumerator QueueDive()
     {
+        Debug.Log("coroutine started");
         noGroundDetected = true;
         yield return new WaitForSeconds(myProfile.diveWaitTime);
         if (noGroundDetected)
@@ -561,7 +562,7 @@ public class PlayerControllerDebug : MonoBehaviour
         //Debug.Break();
         float newYAxis = Vector3.Dot(gravity.gravitationalDirection, myCamera.transform.forward);
         newYAxis = (newYAxis - -1) / (1 - -1) * (1 - 0) + 0;
-        Debug.Log(newYAxis);
+        //Debug.Log(newYAxis);
         //StartCoroutine(TransitionCamera(newYAxis));
         myCameraCm.m_YAxis.Value = newYAxis;
         
@@ -571,7 +572,6 @@ public class PlayerControllerDebug : MonoBehaviour
         //calculate x axis
         float xAxis = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
         //myCameraCm.m_XAxis.Value = xAxis;
-        Debug.Log(xAxis);
     }
     
     //fix animation controller when necessary
@@ -711,7 +711,11 @@ public class PlayerControllerDebug : MonoBehaviour
         {
             //unnecessary??
             playerAni.SetBool("Diving", false);
-            noGroundDetected = false;
+            if (noGroundDetected)
+            {
+                StopCoroutine(QueueDive());
+                noGroundDetected = false;
+            }
         }
     }
     

@@ -8,7 +8,7 @@ using UnityEngine.Serialization;
 using UnityEngine.SocialPlatforms;
 
 [RequireComponent(typeof(CustomGravity))]
-public class InteractableObject : MonoBehaviour
+public class InteractableObject : MonoBehaviour, ICollisionReactable
 {
     #region Variables
     [Header("Settings")]
@@ -16,6 +16,8 @@ public class InteractableObject : MonoBehaviour
     [SerializeField] public objectType objectTag;
     [Tooltip("Custom gravity component")]
     [SerializeField] public CustomGravity gravity;
+    [SerializeField] float terminalVelocity = 20f;
+    [SerializeField] float dragResistance = 0.5f;
     
     [Header("Attractor information (Only for visualising)")]
     [Tooltip("The main slot the object is attracted to")]
@@ -33,12 +35,17 @@ public class InteractableObject : MonoBehaviour
     [SerializeField] float breakForce = 100f;
     [Tooltip("The speed of the object when it translates between attraction points")]
     [SerializeField] float pullSpeed = 5f;
-    
-    [Header("States (Only for visualising")]
+
+    [Header("States (Only for visualising")] 
+    [SerializeField] public bool usable = true;
     [SerializeField] public bool orbiting;
     [SerializeField] public bool launched;
+    [SerializeField] bool terminalVelocityReached;
     [Tooltip("For precise translation between points")]
     [SerializeField] bool queuedMovement;
+
+    [Header("Debug settings (Only for visualising")] 
+    [SerializeField] Material brokenState;
     #endregion
 
     // Start is called before the first frame update
@@ -50,6 +57,10 @@ public class InteractableObject : MonoBehaviour
     
     void FixedUpdate()
     {
+        if (!usable)
+        {
+            return;
+        }
         if (queuedMovement && orbiting)
         {
             if (launchPoint)
@@ -68,12 +79,27 @@ public class InteractableObject : MonoBehaviour
                 queuedMovement = false;
             }
         }
+        if(launched){Debug.Log(gravity.rb.velocity.magnitude);}
+        if (gravity.rb.velocity.magnitude > terminalVelocity && !terminalVelocityReached)
+        {
+            terminalVelocityReached = true;
+            gravity.rb.drag = dragResistance;
+        }
+        else if (gravity.rb.velocity.magnitude < terminalVelocity/2 && terminalVelocityReached)
+        {
+            terminalVelocityReached = false;
+            gravity.rb.drag = 0f;
+        }
     }
 
     #region InteractionEvents
-
+    //player interactions
     public void ToggleOrbit(bool enable , Transform incomingTarget = null, bool retainGravity = false, GravityField attractor = null)
     {
+        if (!usable)
+        {
+            return;
+        }
         if (enable)
         {
             myAttractor = attractor;
@@ -107,6 +133,10 @@ public class InteractableObject : MonoBehaviour
     }
     public void ReadyObject(bool enable, Transform pointToGo)
     {
+        if (!usable)
+        {
+            return;
+        }
         if (enable)
         {
             gameObject.transform.SetParent(pointToGo);
@@ -136,7 +166,6 @@ public class InteractableObject : MonoBehaviour
     }
     void ProfileAttraction(Rigidbody attractionPoint)
     {
-        
         myJoint = gameObject.AddComponent<ConfigurableJoint>();
         myJoint.connectedBody = attractionPoint;
         myJoint.autoConfigureConnectedAnchor = false;
@@ -145,7 +174,6 @@ public class InteractableObject : MonoBehaviour
         LockJoint(false);
         myJoint.breakForce = breakForce;
     }
-
     void LockJoint(bool toggle)
     {
         if (toggle)
@@ -163,11 +191,72 @@ public class InteractableObject : MonoBehaviour
         }
 
     }
+    
+    //environment interactions
     void OnJointBreak(float breakForce)
     {
         Debug.Log("Leaving orbit! " + gameObject.name);
         myAttractor.RemoveItem(gameObject.GetComponent<InteractableObject>());
     }
+    void OnCollisionEnter(Collision other)
+    {
+        if (terminalVelocityReached)
+        {
+            if(other.gameObject.GetComponent<ICollisionReactable>() != null)
+            {
+                other.gameObject.GetComponent<ICollisionReactable>().OnHighSpeedCollision(gameObject.GetComponent<InteractableObject>());
+            }
+            else
+            {
+                OnHighSpeedCollision();
+            }
+        }
+    }
+    
+    //reactions
+    void BreakItem()
+    {
+        if (!usable)
+        {
+            return;
+        }
+        gameObject.GetComponent<Renderer>().material = brokenState;
+        usable = false;
+    }
 
     #endregion
+    
+    
+    public void OnHighSpeedCollision(InteractableObject otherbody = null)
+    {
+        terminalVelocityReached = false;
+        gravity.rb.drag = 0f;
+        switch (objectTag)
+        {
+            case objectType.LightItem:
+                BreakItem();
+                break;
+            case objectType.HeavyItem:
+                Debug.Log("clash!");
+                break;
+            case objectType.StaticItem:
+                Debug.Log("nothing!");
+                break;
+        }
+        if (otherbody != null)
+        {
+            switch (otherbody.objectTag)
+            {
+                case objectType.LightItem:
+                    BreakItem();
+                    break;
+                case objectType.HeavyItem:
+                    Debug.Log("clash!");
+                    break;
+                case objectType.StaticItem:
+                    Debug.Log("nothing!");
+                    break;
+            }
+        }
+    }
 }

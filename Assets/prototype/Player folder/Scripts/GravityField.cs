@@ -83,7 +83,9 @@ public class GravityField : MonoBehaviour
         if (other.gameObject.tag == "Interactable")
         {
             //check if the object exists in the lists already
-            if(objectsInOrbit.Contains(other.gameObject.GetComponent<InteractableObject>()) || objectsOutOfOrbit.Contains(other.gameObject.GetComponent<InteractableObject>()))
+            if(objectsInOrbit.Contains(other.gameObject.GetComponent<InteractableObject>()) || 
+               objectsOutOfOrbit.Contains(other.gameObject.GetComponent<InteractableObject>()) || 
+               !other.gameObject.GetComponent<InteractableObject>().usable)
             {
                 return;
             }
