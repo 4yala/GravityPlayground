@@ -25,7 +25,7 @@ MonoBehaviour:
   groundedDrag: 8
   zeroGravDrag: 3
   jumpForwardAccelerationSpeed: 3
-  maxSpeedJump: 3
+  maxSpeedJump: 25
   diveAccelerationSpeed: 5
   terminalVelocity: 20
   lateralAirDiveSpeed: 3
