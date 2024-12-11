@@ -228,7 +228,6 @@ public class PlayerControllerDebug : MonoBehaviour
                 // prevent from building infinite speed
                 if (rb.velocity.magnitude > myProfile.maxSpeedWalk && grounded)
                 {
-                    Debug.Log("Max walk speed reached");
                     rb.velocity = rb.velocity.normalized * myProfile.maxSpeedWalk;
                 }
                 else if (rb.velocity.magnitude > myProfile.maxSpeedJump && !grounded)

@@ -62,7 +62,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 49859074540aeaf41a9d9f22f36ee1bc, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -145,7 +145,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 49859074540aeaf41a9d9f22f36ee1bc, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -229,7 +229,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 49859074540aeaf41a9d9f22f36ee1bc, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -350,7 +350,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 49859074540aeaf41a9d9f22f36ee1bc, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -434,7 +434,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 49859074540aeaf41a9d9f22f36ee1bc, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -517,7 +517,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 49859074540aeaf41a9d9f22f36ee1bc, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -600,7 +600,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 49859074540aeaf41a9d9f22f36ee1bc, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -683,7 +683,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 49859074540aeaf41a9d9f22f36ee1bc, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -753,7 +753,7 @@ Rigidbody:
   m_GameObject: {fileID: 5533189622618693888}
   serializedVersion: 4
   m_Mass: 1
-  m_Drag: 2.5
+  m_Drag: 0
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -778,7 +778,7 @@ CapsuleCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5533189622618693888}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: a9362f2f4cb4fad48a3e7d562fb3e8a5, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -904,7 +904,19 @@ MonoBehaviour:
     m_ActionId: 884aedcc-e857-48bf-8910-bf7524a1ca28
     m_ActionName: Player/Diving Rotation[/Keyboard/q,/Keyboard/e]
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: -2724383346561695525}
+        m_TargetAssemblyTypeName: PlayerControllerDebug, Assembly-CSharp
+        m_MethodName: CameraRotate
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: f0469eb4-7404-4d5a-8e36-035f737bc255
     m_ActionName: Player/CameraMove[/Mouse/delta]
   - m_PersistentCalls:
@@ -956,9 +968,25 @@ MonoBehaviour:
     m_ActionId: 9df21507-af3a-455d-b8a7-54395c7d154d
     m_ActionName: Player/Shoot[/Mouse/leftButton]
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: -2724383346561695525}
+        m_TargetAssemblyTypeName: PlayerControllerDebug, Assembly-CSharp
+        m_MethodName: ScrollObjects
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 324641e6-4bb0-45dc-b809-dba089f76abc
     m_ActionName: Player/Scroll[/Mouse/scroll]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 9545ab49-8a48-40c8-ab72-653e363952b9
+    m_ActionName: Player/ResetCamera[/Mouse/middleButton]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -1009,50 +1037,45 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2116789600b28c4392c9b6458ec49f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  myProfile: {fileID: 11400000, guid: 73d499f9380088b46ab99e56eb4de7f7, type: 2}
   rb: {fileID: 8816082189579956960}
   playerAni: {fileID: 5893414150438550563}
-  gravity: {fileID: 0}
-  gravityField: {fileID: 0}
-  myCamera: {fileID: 0}
-  myCameraOrientation: {fileID: 0}
-  myCameraCm: {fileID: 0}
-  defaultDistance: 4
-  aimedDistance: 3
-  moveSpeed: 10
-  moveSpeedAimed: 7
-  maxSpeedWalk: 15
-  minSlopeAngle: 10
-  maxSlopeAngle: 45
-  deceleration: 20
-  rotationSpeed: 1000
-  jumpForce: 4
-  groundedDrag: 0
-  zeroGravDrag: 3
-  freeFallDrag: 3
-  jumpForwardSpeed: 5
-  airDiveSpeed: 5
-  maxDiveSpeed: 50
-  diveAcceleration: 1
-  diveRotationSpeed: 50
-  diveCameraRotationSpeed: 1000
-  moveInput: {x: 0, y: 0}
-  rotateInput: 0
-  diveLength: 15
-  requireRecentre: 0
-  zerograv: 0
-  shifted: 0
-  immobile: 0
-  grounded: 0
-  diving: 0
-  shiftDiving: 0
-  cameraTransitioned: 0
-  fieldEnabled: 0
-  aimedDownSights: 0
   animationBools:
   - Movement
   - Zero Grav
   - Grounded
   - Diving
+  gravity: {fileID: 0}
+  gravityField: {fileID: 0}
+  myCamera: {fileID: 0}
+  myCameraOrientation: {fileID: 0}
+  myCameraCm: {fileID: 0}
+  freeCameraCm: {fileID: 0}
+  cameraTarget: {fileID: 0}
+  cameraTarget2: {fileID: 0}
+  gravityMeter: {fileID: 0}
+  currentGravityMeter: 0
+  currentUpdate: 0
+  regenCooldown: 0
+  cooldownTimer: 0
+  moveInput: {x: 0, y: 0}
+  cameraInput: {x: 0, y: 0}
+  rotateInput: 0
+  cameraRight: {x: 0, y: 0, z: 0}
+  landIntialised: 0
+  landOnce: 0
+  jumpIncrement: 0
+  zerograv: 0
+  shifted: 0
+  immobile: 0
+  grounded: 0
+  diving: 0
+  noGroundDetected: 0
+  shiftDiving: 0
+  cameraTransitioned: 0
+  fieldEnabled: 0
+  aimedDownSights: 0
+  cameraCentered: 0
 --- !u!114 &6982570214920854822
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1065,10 +1088,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dab5f37e14be85040811fc32a2eb3515, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  myGravitationalForce: {fileID: 0}
   gravitationalDirection: {x: 0, y: 0, z: 0}
   gravityForceUnit: 9.81
-  rb: {fileID: 0}
+  myGravitationalForce: {fileID: 4776158035026096381}
+  rb: {fileID: 8816082189579956960}
 --- !u!1 &5874129796454649584
 GameObject:
   m_ObjectHideFlags: 0
@@ -1130,7 +1153,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 49859074540aeaf41a9d9f22f36ee1bc, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1214,7 +1237,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 49859074540aeaf41a9d9f22f36ee1bc, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1329,7 +1352,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 49859074540aeaf41a9d9f22f36ee1bc, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

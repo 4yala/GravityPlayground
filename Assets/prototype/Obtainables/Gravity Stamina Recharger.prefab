@@ -13,9 +13,9 @@ GameObject:
   - component: {fileID: 6578648526157323743}
   - component: {fileID: 3117133736339240634}
   - component: {fileID: 1475506538917058004}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Gravity Stamina Recharger
-  m_TagString: Untagged
+  m_TagString: Non-Steppable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -119,3 +119,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   amount: 50
+  reSpawnCoolDown: 20

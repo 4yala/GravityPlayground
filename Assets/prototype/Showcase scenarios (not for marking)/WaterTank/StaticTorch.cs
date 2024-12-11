@@ -6,7 +6,7 @@ using UnityEngine;
 public class StaticTorch : MonoBehaviour
 {
     [SerializeField] GameObject flame;
-    [SerializeField]  bool fireLit;
+    [SerializeField] public bool fireLit;
     // Start is called before the first frame update
     void Start()
     {

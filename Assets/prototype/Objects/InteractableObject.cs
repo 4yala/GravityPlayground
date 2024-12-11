@@ -18,6 +18,7 @@ public class InteractableObject : MonoBehaviour, ICollisionReactable
     [SerializeField] public CustomGravity gravity;
     [SerializeField] float terminalVelocity = 20f;
     [SerializeField] float dragResistance = 0.5f;
+    [SerializeField] string uniqueName = "None";
     
     [Header("Attractor information (Only for visualising)")]
     [Tooltip("The main slot the object is attracted to")]
@@ -46,6 +47,9 @@ public class InteractableObject : MonoBehaviour, ICollisionReactable
 
     [Header("Debug settings (Only for visualising")] 
     [SerializeField] Material brokenState;
+    
+    //unique events
+    public Action uniqueCollisionReaction;
     #endregion
 
     // Start is called before the first frame update
@@ -53,6 +57,7 @@ public class InteractableObject : MonoBehaviour, ICollisionReactable
     {
         gameObject.tag = "Interactable";
         gravity = GetComponent<CustomGravity>();
+        //uhhhh = new test();
     }
     
     void FixedUpdate()
@@ -79,7 +84,6 @@ public class InteractableObject : MonoBehaviour, ICollisionReactable
                 queuedMovement = false;
             }
         }
-        if(launched){Debug.Log(gravity.rb.velocity.magnitude);}
         if (gravity.rb.velocity.magnitude > terminalVelocity && !terminalVelocityReached)
         {
             terminalVelocityReached = true;
@@ -211,8 +215,18 @@ public class InteractableObject : MonoBehaviour, ICollisionReactable
                 OnHighSpeedCollision();
             }
         }
+        if (launched)
+        {
+            Debug.Log(other.gameObject.GetComponent<ICollisionReactable>());
+            if (other.gameObject.GetComponent<ICollisionReactable>() != null)
+            {
+                other.gameObject.GetComponent<ICollisionReactable>().SoftCollision(gameObject);
+            }
+        }
+        
     }
     
+
     //reactions
     void BreakItem()
     {
@@ -258,5 +272,15 @@ public class InteractableObject : MonoBehaviour, ICollisionReactable
                     break;
             }
         }
+    }
+
+    public void SoftCollision(GameObject otherbody = null)
+    {
+        uniqueCollisionReaction?.Invoke();
+    }
+
+    public string ReturnUniqueName()
+    {
+        return uniqueName;
     }
 }

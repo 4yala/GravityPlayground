@@ -4,5 +4,11 @@ using UnityEngine;
 
 public interface ICollisionReactable
 {
-    public void OnHighSpeedCollision(InteractableObject otherbody);
+    virtual void OnHighSpeedCollision(InteractableObject otherbody){}
+    virtual void SoftCollision(GameObject otherbody){}
+    virtual string ReturnUniqueName()
+    {
+        return "None";
+    }
+
 }
