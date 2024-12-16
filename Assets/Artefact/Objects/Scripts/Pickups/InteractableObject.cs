@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(CustomGravity))]
@@ -26,7 +28,7 @@ public class InteractableObject : MonoBehaviour, ICollisionReactable
     [SerializeField] public GravityField myAttractor;
     
     [Header("Attraction settings")] 
-    [SerializeField] ConfigurableJoint myJoint;
+    [SerializeField] public ConfigurableJoint myJoint;
     [Tooltip("Maximum distance from the attraction points until breakage")]
     [SerializeField] float maxDistance = 2f;
     [Tooltip("Maxmimum applied force until breakage")]
@@ -47,6 +49,7 @@ public class InteractableObject : MonoBehaviour, ICollisionReactable
     [SerializeField] Material brokenState;
     
     //unique events
+    Coroutine lockingCoroutine;
     public Action uniqueCollisionReaction;
     public Action uniqueBreakReaction;
     
@@ -94,29 +97,39 @@ public class InteractableObject : MonoBehaviour, ICollisionReactable
         //if a new slot is assigned, translate towards it
         if (queuedMovement && orbiting)
         {
-            
             //if there's a point to launch towards, go to it with priority
             if (launchPoint)
             {
+                //transform.position = launchPoint.transform.position;
                 transform.position = Vector3.MoveTowards(transform.position, launchPoint.TransformPoint(Vector3.zero),  pullSpeed * Time.fixedDeltaTime);
             }
             //otherwise if its orbiting normally, there should be a point to go to
             else
             {
+                //transform.position = attractionPoint.transform.position;
                 transform.position = Vector3.MoveTowards(transform.position, attractionPoint.TransformPoint(Vector3.zero),  pullSpeed * Time.fixedDeltaTime);
             }
             
             //when the object reaches the central position after transition, stop manual movement
-            if (gameObject.transform.localPosition == Vector3.zero)
+            if (gameObject.transform.localPosition == Vector3.zero && lockingCoroutine == null)
             {
                 //finally enable the joint, as the object won't be translating anymore
-                LockJoint(true);
+                //lockingCoroutine = StartCoroutine(LockItem());
                 queuedMovement = false;
+                LockJoint(true);
             }
         }
 
     }
 
+    
+    IEnumerator LockItem()
+    {
+        yield return new WaitForSeconds(2f);
+        queuedMovement = false;
+        LockJoint(true);
+        lockingCoroutine = null;
+    }
     #region InteractionEvents
     
     //player interactions
@@ -139,6 +152,7 @@ public class InteractableObject : MonoBehaviour, ICollisionReactable
             //a parent transform allows for the object to be translated removing the need for the object to have to follow the player via forces (for example during high speeds)
             //which strain the joint, the joint just allows for collisions to interact and break the link
             gameObject.transform.SetParent(attractionPoint);
+            //gameObject.layer = LayerMask.NameToLayer("Held");
             
             //prepare movement to new position
             queuedMovement = true;
@@ -155,6 +169,7 @@ public class InteractableObject : MonoBehaviour, ICollisionReactable
             orbiting = false;
             attractionPoint = incomingTarget;
             gameObject.transform.SetParent(null);
+            //gameObject.layer = LayerMask.NameToLayer("Default");
             
             //destroy joint
             if (myJoint)
@@ -218,6 +233,7 @@ public class InteractableObject : MonoBehaviour, ICollisionReactable
         myJoint.connectedBody = attractionPoint;
         myJoint.autoConfigureConnectedAnchor = false;
         myJoint.anchor = Vector3.zero;
+        myJoint.connectedAnchor = Vector3.zero;
         myJoint.linearLimit = new SoftJointLimit{limit = maxDistance};
         LockJoint(false);
         myJoint.breakForce = breakForce;
@@ -228,7 +244,7 @@ public class InteractableObject : MonoBehaviour, ICollisionReactable
     {
         if (toggle)
         {
-
+            gameObject.transform.localPosition = Vector3.zero;
             myJoint.xMotion = ConfigurableJointMotion.Limited;
             myJoint.yMotion = ConfigurableJointMotion.Limited;
             myJoint.zMotion = ConfigurableJointMotion.Limited;

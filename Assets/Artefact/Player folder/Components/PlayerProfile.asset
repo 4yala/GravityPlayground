@@ -30,9 +30,10 @@ MonoBehaviour:
   terminalVelocity: 20
   lateralAirDiveSpeed: 3
   maxLateralSpeed: 5
+  divingDrag: 3
   diveRotationSpeed: 50
   diveLength: 15
-  diveWaitTime: 1.5
+  diveWaitTime: 1
   maxGravityMeter: 100
   regenRate: 5
   zeroGravRate: 2

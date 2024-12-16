@@ -23,6 +23,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] CustomGravity gravity;
     [Tooltip("Field which interacts with objects (Should be externally placed in scene and referenced)")]
     [SerializeField] public GravityField gravityField;
+    [Tooltip("The pointer for the player's normal downward direction, to avoid confusion (Should be a child of the player and referenced in scene)")] 
+    [SerializeField] GameObject myGravityCompassPointer;
     [Tooltip("UI that the shows the pause menu and other buttons")]
     [SerializeField] GameObject pauseMenu;
     
@@ -54,9 +56,10 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Vector2 cameraInput;
     [SerializeField] float rotateInput;
     [SerializeField] Vector3 cameraRight;
-    [Tooltip("Checker that prevents character orientation fixing from overloading")]
+    //checkers that prevent the land from overloading
     [SerializeField] bool landInitialised;
     [SerializeField] bool landOnce;
+    //cached coroutines
     Coroutine jumpingCoroutine;
     Coroutine diveCheckCoroutine;
     
@@ -101,6 +104,10 @@ public class PlayerController : MonoBehaviour
         //make the targets match player position always
         defaultCameraTarget.position = gameObject.transform.position;
         diveCameraTarget.position = gameObject.transform.position;
+        
+        //compass pointing
+        Quaternion targetRotation = Quaternion.FromToRotation(myGravityCompassPointer.transform.up, Vector3.down) * myGravityCompassPointer.transform.rotation;
+        myGravityCompassPointer.transform.rotation = Quaternion.RotateTowards(myGravityCompassPointer.transform.rotation, targetRotation, 100f * Time.deltaTime);
         
         //run constant checks
         AnimationStates();
@@ -186,12 +193,16 @@ public class PlayerController : MonoBehaviour
                     }
                     
                     //make sure the character faces the direction that it's moving towards
-                    float directionAligntment = Vector3.Dot(transform.forward, targetDirection);
-                    bool aligned = directionAligntment >= 0.9f;
+                    float forwardDirectionAligntment = Vector3.Dot(transform.forward, targetDirection);
+                    bool alignedForward = forwardDirectionAligntment >= 0.9f;
+                    
+                    float upwardDirectionAligntment = Vector3.Dot(transform.up, -gravity.gravitationalDirection);
+                    bool alignedUpward= upwardDirectionAligntment >= 0.9f;
                     
                     //move off if character matches direction
-                    if (aligned)
+                    if (alignedForward && alignedUpward) 
                     {
+                        
                         //finalise with character forward movement only, no strafing
                         if (grounded)
                         {
@@ -361,6 +372,7 @@ public class PlayerController : MonoBehaviour
         }   
     }
     
+
     //Events that are called upon to make changes
     #region Reaction events
 
@@ -422,7 +434,12 @@ public class PlayerController : MonoBehaviour
                 StartCoroutine(LandPlayer(new RaycastHit(), .5f, false));
             }
         }
-        
+        else if (!Physics.Raycast(transform.position, Vector3.down, out hit, myProfile.diveLength))
+        {
+            diving = true;
+            playerAni.SetBool("Diving", true);
+            LockCamera(false);
+        }
         //allow for landing again if necessary (orientation matching)
         landOnce = false;
     }
@@ -432,8 +449,9 @@ public class PlayerController : MonoBehaviour
     {
         //set state
         landInitialised = true;
-        
-        
+        immobile = true;
+        //brake the player and negate gravity
+        rb.drag = 8f;
         //set up to calculate the way the character will flip
         Quaternion targetRotation = Quaternion.identity;
         
@@ -486,12 +504,15 @@ public class PlayerController : MonoBehaviour
         //now move on to do camera
         LockCamera(true);
         myCameraOrientation.transform.up = transform.up;
-
+        
+        
+        rb.drag = 0f;
         //set states to avoid overload
         landInitialised = false;
         
         //this will prevent it from being called again, as it sometimes is due to float precision
         landOnce = true;
+        immobile = false;
         yield return null;
     }
     
